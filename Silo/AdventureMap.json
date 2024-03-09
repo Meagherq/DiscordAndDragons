@@ -88,6 +88,14 @@
             "category": "beverage",
             "foundIn": "4",
             "commands": [ "drink" ]
+        },
+        {
+            "id": "4",
+            "name": "banana",
+            "article": "a",
+            "category": "measure",
+            "foundIn": "1",
+            "commands": [ "measure" ]
         }
     ],
     "monsters": [
