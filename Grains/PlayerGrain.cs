@@ -176,6 +176,38 @@ public class PlayerGrain : Grain, IPlayerGrain
         return $"I can't see {target} here. Are you sure?";
     }
 
+    private async Task<string> Measure(string target)
+    {
+        if (_things.Count is 0)
+        {
+            return "With what? You have no measure items?";
+        }
+
+        if (_roomGrain is not null &&
+            await _roomGrain.FindPlayer(target) is PlayerInfo player)
+        {
+            if (_things.Any(t => t.Category == "measure"))
+            {
+                return $"{target} is {target.Length * 6} inches tall";
+            }
+
+            return "With what? You have no measure items?";
+        }
+
+        if (_roomGrain is not null &&
+            await _roomGrain.FindMonster(target) is MonsterInfo monster)
+        {
+            if (_things.Any(t => t.Category == "measure"))
+            {
+                return $"{target} is {target.Length * 6} inches tall";
+            }
+
+            return "With what? You have no measure items?";
+        }
+
+        return $"I can't see {target} here. Are you sure?";
+    }
+
     private string RemoveStopWords(string s)
     {
         var stopwords = new[] { " on ", " the ", " a " };
@@ -243,6 +275,10 @@ public class PlayerGrain : Grain, IPlayerGrain
             "inv" or "inventory" =>
                 "You are carrying: " +
                 $"{string.Join(" ", _things.Select(x => x.Name))}",
+
+            "measure" => words.Length == 1
+                ? "Measure what?"
+                : await Measure(command[(verb.Length + 1)..]),
 
             "end" => "",
 
