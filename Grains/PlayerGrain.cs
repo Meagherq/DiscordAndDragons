@@ -1,4 +1,6 @@
 using System.Text;
+using Adventure.Grains.Enums;
+using Adventure.Grains.Extensions;
 
 namespace Adventure.Grains;
 
@@ -253,36 +255,42 @@ public class PlayerGrain : Grain, IPlayerGrain
             return "I don't understand.";
         }
 
-        return verb switch
+        if (Enum.TryParse(verb, out PlayerCommands playerCommand)) {
+            return playerCommand switch
+            {
+                PlayerCommands.look =>
+                    await _roomGrain.Description(_myInfo),
+
+                PlayerCommands.go => words.Length == 1
+                    ? "Go where?"
+                    : await Go(words[1]),
+
+                PlayerCommands.north or PlayerCommands.south or PlayerCommands.east or PlayerCommands.west => await Go(verb),
+
+                PlayerCommands.kill => words.Length == 1
+                    ? "Kill what?"
+                    : await Kill(command[(verb.Length + 1)..]),
+
+                PlayerCommands.drop => await Drop(FindMyThing(Rest(words))),
+
+                PlayerCommands.take => await Take(await _roomGrain.FindThing(Rest(words))),
+
+                PlayerCommands.inv or PlayerCommands.inventory =>
+                    "You are carrying: " +
+                    $"{string.Join(" ", _things.Select(x => x.Name))}",
+
+                PlayerCommands.measure => words.Length == 1
+                    ? "Measure what?"
+                    : await Measure(command[(verb.Length + 1)..]),
+
+                PlayerCommands.end => "",
+
+                _ => "I don't understand"
+            };
+        }
+        else
         {
-            "look" =>
-                await _roomGrain.Description(_myInfo),
-
-            "go" => words.Length == 1
-                ? "Go where?"
-                : await Go(words[1]),
-
-            "north" or "south" or "east" or "west" => await Go(verb),
-
-            "kill" => words.Length == 1
-                ? "Kill what?"
-                : await Kill(command[(verb.Length + 1)..]),
-
-            "drop" => await Drop(FindMyThing(Rest(words))),
-
-            "take" => await Take(await _roomGrain.FindThing(Rest(words))),
-
-            "inv" or "inventory" =>
-                "You are carrying: " +
-                $"{string.Join(" ", _things.Select(x => x.Name))}",
-
-            "measure" => words.Length == 1
-                ? "Measure what?"
-                : await Measure(command[(verb.Length + 1)..]),
-
-            "end" => "",
-
-            _ => "I don't understand"
-        };
+            return "I don't understand";
+        }
     }
 }
