@@ -11,6 +11,9 @@ public class RoomGrain : Grain, IRoomGrain
     // communication interface(s).
 
     private string? _description;
+    private string? _region;
+    private string? _location;
+    private string? _elavation;
     private readonly List<PlayerInfo> _players = new();
     private readonly List<MonsterInfo> _monsters = new();
     private readonly List<Thing> _things = new();
@@ -58,6 +61,9 @@ public class RoomGrain : Grain, IRoomGrain
     Task IRoomGrain.SetInfo(RoomInfo info)
     {
         _description = info.Description;
+        _region = info.Region;
+        _location = info.Location;
+        _elavation = info.Elevation;
 
         foreach (var kv in info.Directions)
         {
@@ -90,6 +96,9 @@ public class RoomGrain : Grain, IRoomGrain
     {
         StringBuilder builder = new();
         builder.AppendLine(_description);
+        builder.AppendLine($"Region: {_region}");
+        builder.AppendLine($"Location: {_location}");
+        builder.AppendLine($"Elevation: {_elavation}");
 
         if (_things.Count > 0)
         {

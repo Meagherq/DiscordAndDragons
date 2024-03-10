@@ -5,7 +5,10 @@
             "id": "0",
             "name": "west-of-house",
             "description": "You are standing in an open field west of a white house with a boarded front door.\nThere is a forest to the north.",
-            "directions": { "north": "1" }
+            "directions": { "north": "1" },
+            "region": "start",
+            "location": "start",
+            "elevation": "0"
         },
         {
             "id": "1",
@@ -14,7 +17,10 @@
             "directions": {
                 "north": "2",
                 "south": "0"
-            }
+            },
+            "region": "forest",
+            "location": "entrance",
+            "elevation": "0"
         },
         {
             "id": "2",
@@ -23,7 +29,10 @@
             "directions": {
                 "west": "3",
                 "south": "1"
-            }
+            },
+            "region": "forest",
+            "location": "clearing",
+            "elevation": "0"
         },
         {
             "id": "3",
@@ -32,7 +41,10 @@
             "directions": {
                 "west": "4",
                 "east": "2"
-            }
+            },
+            "region": "canyon",
+            "location": "entrance",
+            "elevation": "0"
         },
         {
             "id": "4",
@@ -41,19 +53,28 @@
             "directions": {
                 "east": "3",
                 "down": "-1"
-            }
+            },
+            "region": "beach",
+            "location": "river",
+            "elevation": "0"
         },
         {
             "id": "-1",
             "name": "styx",
             "description": "In front of you is the River Styx.",
-            "directions": { "forward": "-2" }
+            "directions": { "forward": "-2" },
+            "region": "purgatory",
+            "location": "river",
+            "elevation": "-1"
         },
         {
             "id": "-2",
             "name": "hades",
             "description": "\nWelcome to Hades!\n\nWe must inform you that no one ever leaves.\nYou might as well end right now.",
-            "directions": {}
+            "directions": {},
+            "region": "hell",
+            "location": "start",
+            "elevation": "-2"
         }
     ],
     "things": [

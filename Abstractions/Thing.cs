@@ -21,6 +21,9 @@ public record class RoomInfo(
     string Id,
     string Name,
     string Description,
+    string Region,
+    string Location,
+    string Elevation,
     Dictionary<string, string> Directions);
 
 [GenerateSerializer, Immutable]

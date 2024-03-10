@@ -44,7 +44,7 @@ public sealed class SeedAdventureGameTask : IStartupTask
         {
             await MakeMonster(
                 monster,
-                rooms[rand.Next(0, rooms.Count)]);
+                rooms[rand.Next(1, rooms.Count)]);
         }
     }
 
