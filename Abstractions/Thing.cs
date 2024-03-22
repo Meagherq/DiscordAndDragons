@@ -17,16 +17,6 @@ public record class MapInfo(
     List<MonsterInfo> Monsters);
 
 [GenerateSerializer, Immutable]
-public record class RoomInfo(
-    string Id,
-    string Name,
-    string Description,
-    string Region,
-    string Location,
-    string Elevation,
-    Dictionary<string, string> Directions);
-
-[GenerateSerializer, Immutable]
 public record class CategoryInfo(
     string Id,
     string Name,

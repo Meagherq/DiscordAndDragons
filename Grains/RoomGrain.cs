@@ -14,6 +14,7 @@ public class RoomGrain : Grain, IRoomGrain
     private string? _region;
     private string? _location;
     private string? _elavation;
+    private string? _map;
     private readonly List<PlayerInfo> _players = new();
     private readonly List<MonsterInfo> _monsters = new();
     private readonly List<Thing> _things = new();
@@ -64,6 +65,7 @@ public class RoomGrain : Grain, IRoomGrain
         _region = info.Region;
         _location = info.Location;
         _elavation = info.Elevation;
+        _map = info.Map;
 
         foreach (var kv in info.Directions)
         {
@@ -100,6 +102,15 @@ public class RoomGrain : Grain, IRoomGrain
         builder.AppendLine($"Location: {_location}");
         builder.AppendLine($"Elevation: {_elavation}");
 
+        if (_exits.Count > 0)
+        {
+            builder.AppendLine("These exits are present:");
+            foreach (var exit in _exits)
+            {
+                builder.Append("  ").AppendLine(exit.Key);
+            }
+        }
+
         if (_things.Count > 0)
         {
             builder.AppendLine("The following things are present:");
@@ -123,6 +134,11 @@ public class RoomGrain : Grain, IRoomGrain
                 {
                     builder.Append("  ").AppendLine(monster.Name);
                 }
+        }
+        if (!string.IsNullOrWhiteSpace(_map))
+        {
+            builder.AppendLine($"Map: ");
+            builder.AppendLine($"{ _map}");
         }
 
         return Task.FromResult(builder.ToString());

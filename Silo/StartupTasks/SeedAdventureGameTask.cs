@@ -2,6 +2,9 @@
 // Licensed under the MIT License.
 
 using System.Reflection;
+using Adventure.Mapping.Extensions;
+using Adventure.Mapping.Mapper;
+using Adventure.Mapping.Models;
 using Newtonsoft.Json;
 
 namespace Adventure.Silo.StartupTasks;
@@ -24,9 +27,31 @@ public sealed class SeedAdventureGameTask : IStartupTask
         var jsonData = await File.ReadAllTextAsync(mapFileName);
         var data = JsonConvert.DeserializeObject<MapInfo>(jsonData)!;
 
+        //Generate random dimensions for the array
+        var random = new Random();
+        var x = random.Next(20, 40);
+        var y = random.Next(20, 40);
+        var z = random.Next(1, 3);
+        //BuildMapData
+        var mapData = DimensionExtensions.BuildDemensionArray(x, y, z);
+        //Check for bad data
+        var hasBadMap = DimensionExtensions.CheckForBadMap(mapData);
+        //If bad data, loop until bad data is no more - THIS IS PROBABLY WHY IT DIDN'T START!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        while (hasBadMap)
+        {
+            //Reset map
+            mapData = null;
+            //Build a new map
+            mapData = DimensionExtensions.BuildDemensionArray(x, y, z);
+            //Check for bad map data
+            hasBadMap = DimensionExtensions.CheckForBadMap(mapData);
+        }
+
+        var mappedRooms = RoomMapper.MapRooms(mapData);
+
         // Initialize the game world using the game data
         var rooms = new List<IRoomGrain>();
-        foreach (var room in data.Rooms)
+        foreach (var room in mappedRooms)
         {
             var roomGr = await MakeRoom(room);
             if (int.Parse(room.Id) >= 0)
