@@ -75,6 +75,28 @@ public class RoomGrain : Grain, IRoomGrain
         return Task.CompletedTask;
     }
 
+    Task<List<string>> IRoomGrain.ResetInfo()
+    {
+        var result = new List<string>();
+        _description = "";
+        _region = "";
+        _location = "";
+        _elavation = "";
+        _map = "";
+        _things.Clear();
+        _exits.Clear();
+
+        foreach (var e in _players)
+        {
+            result.Add(e.Key);
+        }
+
+        _players.Clear();
+        _monsters.Clear();
+
+        return Task.FromResult(result);
+    }
+
     Task<Thing?> IRoomGrain.FindThing(string name) =>
         Task.FromResult(_things.FirstOrDefault(x => x.Name == name));
 
@@ -139,6 +161,18 @@ public class RoomGrain : Grain, IRoomGrain
         {
             builder.AppendLine($"Map: ");
             builder.AppendLine($"{ _map}");
+        }
+
+        return Task.FromResult(builder.ToString());
+    }
+
+    Task<string> IRoomGrain.ViewMap()
+    {
+        StringBuilder builder = new();
+        if (!string.IsNullOrWhiteSpace(_map))
+        {
+            builder.AppendLine($"Map: ");
+            builder.AppendLine($"{_map}");
         }
 
         return Task.FromResult(builder.ToString());

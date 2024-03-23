@@ -8,8 +8,9 @@ public interface IRoomGrain : IGrainWithStringKey
 {
     // Rooms have a textual description
     Task<string> Description(PlayerInfo whoisAsking);
+    Task<string> ViewMap();
     Task SetInfo(RoomInfo info);
-
+    Task<List<string>> ResetInfo();
     Task<IRoomGrain?> ExitTo(string direction);
 
     // Players can enter or exit a room

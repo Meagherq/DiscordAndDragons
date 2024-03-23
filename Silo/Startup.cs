@@ -17,6 +17,7 @@ public sealed class Startup
         services.AddSingleton<InventoryService>();
         services.AddSingleton<ProductService>();
         services.AddScoped<PlayerService>();
+        services.AddScoped<RoomService>();
         services.AddScoped<ComponentStateChangedObserver>();
         services.AddSingleton<ToastService>();
         services.AddLocalStorageServices();
