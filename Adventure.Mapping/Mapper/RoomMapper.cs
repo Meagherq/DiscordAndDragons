@@ -73,7 +73,7 @@ public static class RoomMapper
                             directions.Add(direction, idMap.First(s => s.Key == e.id).Value.ToString());
                         }
                     }
-                    var map = rooms[x, y].Region == RegionType.Start ? DimensionExtensions.DrawMap(rooms) : null;
+                    var map = rooms[x, y].Region == RegionType.Start ? Mapping.Extensions.MapExtensions.DrawMap(rooms) : null;
                     var room = new RoomInfo
                     (
                         idMap.First(s => s.Key == rooms[x, y].Id).Value.ToString(),

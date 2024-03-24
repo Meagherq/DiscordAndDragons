@@ -34,27 +34,8 @@ public sealed class RoomService : BaseClusterService
         var jsonData = await File.ReadAllTextAsync(mapFileName);
         var data = JsonConvert.DeserializeObject<MapInfo>(jsonData)!;
 
-        //Generate random dimensions for the array
-        var random = new Random();
-        var x = random.Next(20, 40);
-        var y = random.Next(20, 40);
-        var z = random.Next(1, 3);
-        //BuildMapData
-        var mapData = DimensionExtensions.BuildDemensionArray(x, y, z);
-        //Check for bad data
-        var hasBadMap = DimensionExtensions.CheckForBadMap(mapData);
-        //If bad data, loop until bad data is no more - THIS IS PROBABLY WHY IT DIDN'T START!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        while (hasBadMap)
-        {
-            //Reset map
-            mapData = null;
-            //Build a new map
-            mapData = DimensionExtensions.BuildDemensionArray(x, y, z);
-            //Check for bad map data
-            hasBadMap = DimensionExtensions.CheckForBadMap(mapData);
-        }
-
-        var mappedRooms = RoomMapper.MapRooms(mapData).OrderBy(x => x.Id).ToList();
+        //Create Map
+        var mappedRooms = Mapping.Extensions.MapExtensions.CreateMap();
 
         // Initialize the game world using the game data
         var rooms = new List<IRoomGrain>();
