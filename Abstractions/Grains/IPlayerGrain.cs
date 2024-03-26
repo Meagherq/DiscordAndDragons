@@ -1,4 +1,4 @@
-namespace Adventure.Abstractions;
+namespace Adventure.Abstractions.Grains;
 
 /// <summary>
 /// A player is, well, there's really no other good name...
@@ -7,7 +7,7 @@ public interface IPlayerGrain : IGrainWithStringKey
 {
     // Players have names
     Task<string?> Name();
-    Task SetName(string name);
+    Task SetInfo(string name, int adventureId);
 
     // Each player is located in exactly one room
     Task SetRoomGrain(IRoomGrain room);

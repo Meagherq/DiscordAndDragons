@@ -1,4 +1,6 @@
 using System.Text;
+using Adventure.Abstractions.Grains;
+using Adventure.Abstractions.Info;
 
 namespace Adventure.Grains;
 
@@ -19,6 +21,11 @@ public class RoomGrain : Grain, IRoomGrain
     private readonly List<MonsterInfo> _monsters = new();
     private readonly List<Thing> _things = new();
     private readonly Dictionary<string, IRoomGrain> _exits = new();
+    protected readonly IClusterClient _client = null!;
+    public RoomGrain(IClusterClient client)
+    {
+        _client = client;
+    }
 
     Task IRoomGrain.Enter(PlayerInfo player)
     {

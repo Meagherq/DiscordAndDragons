@@ -1,3 +1,5 @@
+using Adventure.Abstractions.Info;
+
 namespace Adventure.Abstractions;
 
 [GenerateSerializer, Immutable]

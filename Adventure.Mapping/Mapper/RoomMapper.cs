@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Adventure.Abstractions;
+using Adventure.Abstractions.Info;
 using Adventure.Mapping.Enums;
 using Adventure.Mapping.Extensions;
 using Adventure.Mapping.Models;
@@ -14,7 +14,7 @@ using Adventure.Mapping.Models;
 namespace Adventure.Mapping.Mapper;
 public static class RoomMapper
 {
-    public static List<RoomInfo> MapRooms(MapRoomData[,] rooms)
+    public static List<RoomInfo> MapRooms(MapRoomData[,] rooms, int AdventureId)
     {
         var idMap = new Dictionary<int, int>();
         var roomList = new List<MapRoomData>();
@@ -83,6 +83,7 @@ public static class RoomMapper
                         "",
                         "",
                         directions,
+                        AdventureId,
                         map
                     );
 

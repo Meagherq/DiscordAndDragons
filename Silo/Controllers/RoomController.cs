@@ -15,9 +15,9 @@ public class RoomController : ControllerBase
     }
 
     [HttpPost("create")]
-    public async Task<IActionResult> Play()
+    public async Task<IActionResult> Play(int adventureId)
     {
-        var playResult = await _roomService.Create();
+        var playResult = await _roomService.Create(adventureId);
 
         return Ok(playResult);
     }
@@ -31,9 +31,9 @@ public class RoomController : ControllerBase
     }
 
     [HttpPost("resetMap")]
-    public async Task<IActionResult> ResetMap()
+    public async Task<IActionResult> ResetMap(int adventureId)
     {
-        var createdResult = await _roomService.Reset();
+        var createdResult = await _roomService.Reset(adventureId);
 
         return Ok(createdResult);
     }

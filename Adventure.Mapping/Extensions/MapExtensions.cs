@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Adventure.Abstractions;
+using Adventure.Abstractions.Info;
 using Adventure.Mapping.Enums;
 using Adventure.Mapping.Mapper;
 using Adventure.Mapping.Models;
@@ -18,7 +18,7 @@ namespace Adventure.Mapping.Extensions
         /// Creates a new Map for Adventure Game
         /// </summary>
         /// <returns></returns>
-        public static List<RoomInfo> CreateMap()
+        public static List<RoomInfo> CreateMap(int adventureId)
         {
             //Generate random dimensions for the array
             var random = new Random();
@@ -41,7 +41,7 @@ namespace Adventure.Mapping.Extensions
             }
 
             //Return map data sorted by Id ASC
-            return RoomMapper.MapRooms(mapData).OrderBy(x => x.Id).ToList();
+            return RoomMapper.MapRooms(mapData, adventureId).OrderBy(x => x.Id).ToList();
         }
 
         /// <summary>

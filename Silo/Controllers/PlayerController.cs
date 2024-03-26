@@ -28,7 +28,7 @@ public class PlayerController : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDto createDto)
     {
-        var createdResult = await _playerService.CreatePlayer(createDto.name, createDto.id);
+        var createdResult = await _playerService.CreatePlayer(createDto.name, createDto.id, createDto.adventureId);
 
         return CreatedAtAction(nameof(CreatePlayer), createdResult);
     }

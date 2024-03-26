@@ -1,4 +1,6 @@
-namespace Adventure.Abstractions;
+using Adventure.Abstractions.Info;
+
+namespace Adventure.Abstractions.Grains;
 
 public interface IMonsterGrain : IGrainWithStringKey
 {
@@ -11,4 +13,5 @@ public interface IMonsterGrain : IGrainWithStringKey
     Task<IRoomGrain> RoomGrain();
 
     Task<string> Kill(IRoomGrain room);
+    Task AddToAdventure(int adventureId);
 }

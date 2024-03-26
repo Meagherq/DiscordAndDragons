@@ -1,11 +1,14 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License.
 
+using Adventure.Abstractions.Grains;
+
 namespace Adventure.Silo.Services;
 
 public sealed class PlayerService : BaseClusterService
 {
     private readonly IHttpContextAccessor _httpContextAccessor = null!;
+
     public PlayerService(
         IHttpContextAccessor httpContextAccessor, IClusterClient client) :
         base(httpContextAccessor, client)
@@ -29,11 +32,11 @@ public sealed class PlayerService : BaseClusterService
         }
     }
 
-    public async Task<string> CreatePlayer(string name, string id)
+    public async Task<string> CreatePlayer(string name, string id, int adventureId)
     {
         var playerGrain = _client.GetGrain<IPlayerGrain>(id);
         var room1 = _client.GetGrain<IRoomGrain>("0");
-        await playerGrain.SetName(name);
+        await playerGrain.SetInfo(name, adventureId);
         await playerGrain.SetRoomGrain(room1);
         var playerName = await playerGrain.Name();
         var result = await playerGrain.Play("look");

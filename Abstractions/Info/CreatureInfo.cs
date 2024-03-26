@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Adventure.Abstractions;
+namespace Adventure.Abstractions.Info;
 public record class CreatureInfo
 {
 }

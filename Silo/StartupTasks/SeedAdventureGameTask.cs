@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System.Reflection;
+using Adventure.Abstractions.Grains;
+using Adventure.Abstractions.Info;
 using Adventure.Mapping.Extensions;
 using Adventure.Mapping.Mapper;
 using Adventure.Mapping.Models;

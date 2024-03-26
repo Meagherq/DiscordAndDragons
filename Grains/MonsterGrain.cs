@@ -1,9 +1,17 @@
+using Adventure.Abstractions.Grains;
+using Adventure.Abstractions.Info;
+
 namespace Adventure.Grains;
 
 public class MonsterGrain : Grain, IMonsterGrain
 {
     private MonsterInfo _monsterInfo = new();
     private IRoomGrain? _roomGrain; // Current room
+    protected readonly IClusterClient _client = null!;
+    public MonsterGrain(IClusterClient client)
+    {
+        _client = client;
+    }
 
     public override Task OnActivateAsync(CancellationToken cancellationToken)
     {
@@ -21,6 +29,17 @@ public class MonsterGrain : Grain, IMonsterGrain
     Task IMonsterGrain.SetInfo(MonsterInfo info)
     {
         _monsterInfo = info;
+        var adventure = _client.GetGrain<IAdventureGrain>(info.AdventureId.Value);
+        if (adventure is not null)
+        {
+            adventure.AddMonster(_monsterInfo);
+        }
+        return Task.CompletedTask;
+    }
+
+    Task IMonsterGrain.AddToAdventure(int adventureId)
+    {
+        _client.GetGrain<IAdventureGrain>(adventureId).AddMonster(_monsterInfo);
         return Task.CompletedTask;
     }
 

@@ -1,6 +1,7 @@
-namespace Adventure.Abstractions;
+namespace Adventure.Abstractions.Info;
 
 [GenerateSerializer, Immutable]
 public record class PlayerInfo(
     string Key,
-    string? Name);
+    string? Name,
+    int? AdventureId);

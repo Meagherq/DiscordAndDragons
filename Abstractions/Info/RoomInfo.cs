@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Adventure.Abstractions;
+namespace Adventure.Abstractions.Info;
 [GenerateSerializer, Immutable]
 public record class RoomInfo(
     string Id,
@@ -17,4 +17,5 @@ public record class RoomInfo(
     string Location,
     string Elevation,
     Dictionary<string, string> Directions,
+    int? AdventureId,
     string? Map);

@@ -1,16 +1,17 @@
-namespace Adventure.Abstractions;
+using Adventure.Abstractions.Info;
+
+namespace Adventure.Abstractions.Grains;
 
 /// <summary>
 /// A room is any location in a game, including outdoor locations and
 /// spaces that are arguably better described as moist, cold, caverns.
 /// </summary>
-public interface IRoomGrain : IGrainWithStringKey
+public interface ITurnOrderManagerGrain : IGrainWithStringKey
 {
     // Rooms have a textual description
     Task<string> Description(PlayerInfo whoisAsking);
-    Task<string> ViewMap();
     Task SetInfo(RoomInfo info);
-    Task<List<string>> ResetInfo();
+
     Task<IRoomGrain?> ExitTo(string direction);
 
     // Players can enter or exit a room

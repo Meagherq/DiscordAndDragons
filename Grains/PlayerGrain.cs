@@ -1,4 +1,6 @@
 using System.Text;
+using Adventure.Abstractions.Grains;
+using Adventure.Abstractions.Info;
 using Adventure.Grains.Enums;
 using Adventure.Grains.Extensions;
 
@@ -11,10 +13,15 @@ public class PlayerGrain : Grain, IPlayerGrain
 
     private bool _killed = false;
     private PlayerInfo _myInfo = null!;
+    protected readonly IClusterClient _client = null!;
+    public PlayerGrain(IClusterClient client)
+    {
+        _client = client;
+    }
 
     public override Task OnActivateAsync(CancellationToken cancellationToken)
     {
-        _myInfo = new(this.GetPrimaryKeyString(), "nobody");
+        _myInfo = new(this.GetPrimaryKeyString(), "nobody", null);
         return base.OnActivateAsync(cancellationToken);
     }
 
@@ -79,9 +86,15 @@ public class PlayerGrain : Grain, IPlayerGrain
         return "I don't understand.";
     }
 
-    Task IPlayerGrain.SetName(string name)
+    Task IPlayerGrain.SetInfo(string name, int adventureId)
     {
         _myInfo = _myInfo with { Name = name };
+        _myInfo = _myInfo with { AdventureId = adventureId };
+        var adventure = _client.GetGrain<IAdventureGrain>(adventureId);
+        if (adventure is not null)
+        {
+            adventure.AddPlayer(_myInfo);
+        }
         return Task.CompletedTask;
     }
 

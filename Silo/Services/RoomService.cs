@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License.
 
+using Adventure.Abstractions.Grains;
+using Adventure.Abstractions.Info;
+using Adventure.Grains;
 using Adventure.Mapping.Extensions;
 using Adventure.Mapping.Mapper;
 using Newtonsoft.Json;
@@ -23,7 +26,7 @@ public sealed class RoomService : BaseClusterService
         _grainFactory = grainFactory;
     }
 
-    public async Task<string> Create()
+    public async Task<string> Create(int adventureId)
     {
         var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         var mapFileName = Path.Combine(path, "AdventureMap.json");
@@ -35,7 +38,7 @@ public sealed class RoomService : BaseClusterService
         var data = JsonConvert.DeserializeObject<MapInfo>(jsonData)!;
 
         //Create Map
-        var mappedRooms = Mapping.Extensions.MapExtensions.CreateMap();
+        var mappedRooms = Mapping.Extensions.MapExtensions.CreateMap(adventureId);
 
         // Initialize the game world using the game data
         var rooms = new List<IRoomGrain>();
@@ -48,6 +51,8 @@ public sealed class RoomService : BaseClusterService
             }
         }
 
+        await _client.GetGrain<IAdventureGrain>(adventureId).AddRooms(mappedRooms);
+
         foreach (var thing in data.Things)
         {
             await MakeThing(thing);
@@ -55,8 +60,9 @@ public sealed class RoomService : BaseClusterService
 
         foreach (var monster in data.Monsters)
         {
+            var monsterOnAdventure = new MonsterInfo(monster.Id, monster.Name, adventureId, monster.KilledBy);
             await MakeMonster(
-                monster,
+                monsterOnAdventure,
                 rooms[rand.Next(1, rooms.Count)]);
         }
 
@@ -70,7 +76,7 @@ public sealed class RoomService : BaseClusterService
         return await roomGrain.ViewMap();
     }
 
-    public async Task<string> Reset()
+    public async Task<string> Reset(int adventureId)
     {
         var players = new List<string>();
         //Maps should never have over 1000 rooms currently, so we iterate through 1000 rooms by int Id to reset any in use.
@@ -86,7 +92,7 @@ public sealed class RoomService : BaseClusterService
             }
         }
 
-        await Create();
+        await Create(adventureId);
 
         foreach(var e in players)
         {

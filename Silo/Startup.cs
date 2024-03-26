@@ -18,6 +18,8 @@ public sealed class Startup
         services.AddSingleton<ProductService>();
         services.AddScoped<PlayerService>();
         services.AddScoped<RoomService>();
+        services.AddScoped<AdventureService>();
+        services.AddScoped<AdventureLogService>();
         services.AddScoped<ComponentStateChangedObserver>();
         services.AddSingleton<ToastService>();
         services.AddLocalStorageServices();
