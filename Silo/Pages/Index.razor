@@ -1,4 +1,6 @@
 @page "/"
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedSessionStorage ProtectedSessionStore
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-16">
     <MudText Typo=Typo.h4 Class="pb-4">Welcome to the Orleans Discord Adventure App</MudText>
@@ -6,5 +8,26 @@
         <MudListItem>
             Use the this link to get to the Swagger Page: <a href="/swagger/index.html">Swagger Link</a>.
         </MudListItem>
+    </MudList>
+</MudContainer>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-16">
+    <MudList>
+@*         <MudSelect T="AdventureInfo" Label="name" Variant=Variant.Text AnchorOrigin=Origin.BottomCenter>
+            @foreach (var key in _adventures)
+            {
+                <MudSelectItem T="AdventureInfo" Value=@key.Name/>
+            }
+        </MudSelect> *@
+        <MudText>
+            Enter your AdventureId, or leave blank to start a new Adventure.
+        </MudText>
+        <MudNumericField @bind-Value=AdventureId Label="AdventureId" Variant="Variant.Text" TextChanged="UpdateAdventureId"/>
+        <MudSpacer />
+        <MudTextField @bind-Value="AdventureName" Placeholder="Adventure Name"
+            Adornment="Adornment.Start" MaxLength="20" TextChanged="UpdateAdventureName" Immediate=true>
+        </MudTextField>
+        <MudSpacer />
+        <MudButton OnClick=@CreateSession Color=Color.Tertiary Variant=Variant.Filled
+            Size=Size.Large Disabled=@createAdventureEnabled>Start /Join Adventure</MudButton>
     </MudList>
 </MudContainer>

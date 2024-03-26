@@ -24,7 +24,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Adventure.Grains", "Grains\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Adventure.Silo", "Silo\Adventure.Silo.csproj", "{349C6EA8-C39A-4048-9A3A-28AEC4068577}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adventure.Mapping", "Adventure.Mapping\Adventure.Mapping.csproj", "{7CBB841C-A1C5-4501-A0CA-E548D0DDD3A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Adventure.Mapping", "Adventure.Mapping\Adventure.Mapping.csproj", "{7CBB841C-A1C5-4501-A0CA-E548D0DDD3A2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
