@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using MudBlazor;
 using System.Text.RegularExpressions;
+using Orleans.Streams;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
+using Adventure.Grains.Models;
+using Adventure.Grains.Enums;
 
 namespace Adventure.Silo.Pages;
 
@@ -23,6 +27,7 @@ public sealed partial class AdventureInterface
     private string map;
     private string playResponse;
     private string currentPlayerLocation;
+    private StreamSubscriptionHandle<PlayerNotification>? subscription;
 
     [Inject]
     public PlayerService _playerService { get; set; } = null!;
@@ -63,33 +68,57 @@ public sealed partial class AdventureInterface
         playResponse = response;
         ProcessResponse(response);
 
+        subscription = await _playerService.SubscribeAsync(
+            AdventureId.Value,
+            notification => InvokeAsync(
+                () => HandleNotificationAsync(notification)));
+
         await base.OnInitializedAsync();
     }
 
-    private async Task MoveNorth()
+    private async Task PlayerCommand_North()
     {
-        var response = await _playerService.Command("north", PlayerId.ToString());
-        ProcessResponse(response);
+        await _playerService.Command(PlayerCommands.north.ToString(), PlayerId.ToString());
     }
-    private async Task MoveSouth()
+    private async Task PlayerCommand_South()
     {
-        var response = await _playerService.Command("south", PlayerId.ToString());
-        ProcessResponse(response);
+        await _playerService.Command(PlayerCommands.south.ToString(), PlayerId.ToString());
     }
-    private async Task MoveEast()
+    private async Task PlayerCommand_East()
     {
-        var response = await _playerService.Command("east", PlayerId.ToString());
-        ProcessResponse(response);
+        await _playerService.Command(PlayerCommands.east.ToString(), PlayerId.ToString());
     }
-    private async Task MoveWest()
+    private async Task PlayerCommand_West()
     {
-        var response = await _playerService.Command("west", PlayerId.ToString());
-        ProcessResponse(response);
+        await _playerService.Command(PlayerCommands.west.ToString(), PlayerId.ToString());
+    }
+    private async Task PlayerCommand_Look()
+    {
+        await _playerService.Command(PlayerCommands.look.ToString(), PlayerId.ToString());
+    }
+    private async Task PlayerCommand_Kill()
+    {
+        await _playerService.Command(PlayerCommands.kill.ToString(), PlayerId.ToString());
+    }
+    private async Task PlayerCommand_Drop()
+    {
+        await _playerService.Command(PlayerCommands.drop.ToString(), PlayerId.ToString());
+    }
+    private async Task PlayerCommand_Take()
+    {
+        await _playerService.Command(PlayerCommands.take.ToString(), PlayerId.ToString());
+    }
+    private async Task PlayerCommand_Inventory()
+    {
+        await _playerService.Command(PlayerCommands.inventory.ToString(), PlayerId.ToString());
+    }
+    private async Task PlayerCommand_Measure()
+    {
+        await _playerService.Command(PlayerCommands.measure.ToString(), PlayerId.ToString());
     }
 
     private void ProcessResponse(string response)
     {
-        playResponse = response;
         if(response.Contains("north")) northEnabled = false;
         else northEnabled = true;
 
@@ -118,5 +147,22 @@ public sealed partial class AdventureInterface
     {
         var result =  _roomService.GetDiscovery(int.Parse(CleanLine(input)));
         return result.Result;
+    }
+
+    private Task HandleNotificationAsync(PlayerNotification notification)
+    {
+        playResponse = notification.message;
+        if (notification.playerId == PlayerId) {
+            ProcessResponse(notification.message);
+        }
+        else
+        {
+            eastEnabled = true;
+            westEnabled = true;
+            northEnabled = true;
+            southEnabled = true;
+        }
+        StateHasChanged();
+        return Task.CompletedTask;
     }
 }

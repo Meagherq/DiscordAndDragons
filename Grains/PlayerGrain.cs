@@ -1,8 +1,14 @@
+using System.IO;
 using System.Text;
+using System.Xml.Linq;
 using Adventure.Abstractions.Grains;
 using Adventure.Abstractions.Info;
 using Adventure.Grains.Enums;
 using Adventure.Grains.Extensions;
+using Adventure.Grains.Models;
+using Orleans.Streams;
+using Orleans.Runtime;
+using Orleans.Providers;
 
 namespace Adventure.Grains;
 
@@ -257,6 +263,7 @@ public class PlayerGrain : Grain, IPlayerGrain
 
         var words = command.Split(' ');
         var verb = words[0].ToLower();
+        var message = "";
 
         if (_killed && verb is not "end")
         {
@@ -269,7 +276,7 @@ public class PlayerGrain : Grain, IPlayerGrain
         }
 
         if (Enum.TryParse(verb, out PlayerCommands playerCommand)) {
-            return playerCommand switch
+            message =  playerCommand switch
             {
                 PlayerCommands.look =>
                     await _roomGrain.Description(_myInfo),
@@ -305,5 +312,12 @@ public class PlayerGrain : Grain, IPlayerGrain
         {
             return "I don't understand";
         }
+
+        var streamId = StreamId.Create(nameof(IPlayerGrain), _myInfo.AdventureId.Value);
+        this.GetStreamProvider("MemoryStreams").GetStream<PlayerNotification>(_myInfo.AdventureId.Value)
+            .OnNextAsync(new PlayerNotification(message, Guid.Parse(_myInfo.Key)))
+            .Ignore();
+
+        return message;
     }
 }

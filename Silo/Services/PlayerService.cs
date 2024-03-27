@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using Adventure.Abstractions.Grains;
+using Adventure.Grains.Models;
+using Orleans.Streams;
 
 namespace Adventure.Silo.Services;
 
@@ -25,7 +27,8 @@ public sealed class PlayerService : BaseClusterService
         if (result is not "")
         {
             return $"{name}: {result}" ?? $"{name}: I don't understand.";
-        } else
+        }
+        else
         {
             await playerGrain.Die();
             return $"{name}: Game over!";
@@ -43,4 +46,33 @@ public sealed class PlayerService : BaseClusterService
 
         return $"{playerName}: {result}" ?? $"{playerName}: I don't understand.";
     }
+
+    public Task<StreamSubscriptionHandle<PlayerNotification>> SubscribeAsync(
+        int ownerKey, Func<PlayerNotification, Task> action) =>
+        _client.GetStreamProvider("MemoryStreams")
+            .GetStream<PlayerNotification>(ownerKey)
+            .SubscribeAsync(new VoteObserver(action));
 }
+
+sealed file class VoteObserver : IAsyncObserver<PlayerNotification>
+    {
+        private readonly Func<PlayerNotification, Task> _onNext;
+
+        public VoteObserver(
+            Func<PlayerNotification, Task> action)
+        {
+            _onNext = action;
+        }
+
+        public Task OnCompletedAsync() => Task.CompletedTask;
+
+        public Task OnErrorAsync(Exception ex)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task OnNextAsync(
+            PlayerNotification item,
+            StreamSequenceToken? token = null) =>
+            _onNext(item);
+    }

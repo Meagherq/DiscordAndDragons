@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Adventure.Abstractions;
 
 namespace Adventure.Grains.Enums;
-enum PlayerCommands
+public enum PlayerCommands
 {
     look,
     go,

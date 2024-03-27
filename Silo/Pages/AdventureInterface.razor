@@ -58,24 +58,49 @@
     <MudItem xs="12" md="4">
         <MudText Class="pb-4">Move Commands</MudText>
         <MudGrid>
-            <MudItem xs="12" md="6">
-                <MudButton OnClick=@MoveNorth Color=Color.Tertiary Variant=Variant.Filled
-                           Size=Size.Large Disabled=@northEnabled>North</MudButton>
-            </MudItem>
-            <MudItem xs="12" md="6">
-                <MudButton OnClick=@MoveSouth Color=Color.Tertiary Variant=Variant.Filled
-                           Size=Size.Large Disabled=@southEnabled>South</MudButton>
+            <MudItem xs="12" md="12">
+                    <MudButton OnClick=@PlayerCommand_North Color=Color.Tertiary Variant=Variant.Filled Style="margin-left:25%"
+                            Size=Size.Large Disabled=@northEnabled>North</MudButton>
             </MudItem>
         </MudGrid>
         <MudGrid>
             <MudItem xs="12" md="6">
-                <MudButton OnClick=@MoveEast Color=Color.Tertiary Variant=Variant.Filled
-                           Size=Size.Large Disabled=@eastEnabled>East</MudButton>
+                <MudButton OnClick=@PlayerCommand_West Color=Color.Tertiary Variant=Variant.Filled
+                           Size=Size.Large Disabled=@eastEnabled>West</MudButton>
+
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudButton OnClick=@MoveWest Color=Color.Tertiary Variant=Variant.Filled
-                           Size=Size.Large Disabled=@westEnabled>West</MudButton>
+                <MudButton OnClick=@PlayerCommand_East Color=Color.Tertiary Variant=Variant.Filled
+                           Size=Size.Large Disabled=@westEnabled>East</MudButton>
             </MudItem>
         </MudGrid>
+        <MudGrid>
+            <MudItem xs="12" md="12">
+                <MudButton OnClick=@PlayerCommand_South Color=Color.Tertiary Variant=Variant.Filled Style="margin-left:25%"
+                           Size=Size.Large Disabled=@southEnabled>South</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+</MudGrid>
+<MudGrid>
+    <MudItem xs="12" md="8">
+        <MudText Class="pb-4">Player Commands</MudText>
+        <MudItem xs="12" md="12">
+            <MudButton OnClick=@PlayerCommand_Look Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+                        Size=Size.Large>Look</MudButton>
+            <MudButton OnClick=@PlayerCommand_Kill Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+                        Size=Size.Large>Kill</MudButton>
+            <MudButton OnClick=@PlayerCommand_Drop Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+                    Size=Size.Large>Drop</MudButton>
+        </MudItem>
+        <br />
+        <MudItem xs="12" md="12">
+            <MudButton OnClick=@PlayerCommand_Take Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+                        Size=Size.Large>Take</MudButton>
+            <MudButton OnClick=@PlayerCommand_Inventory Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+                        Size=Size.Large>Inventory</MudButton>
+            <MudButton OnClick=@PlayerCommand_Measure Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+                        Size=Size.Large>Measure</MudButton>
+        </MudItem>
     </MudItem>
 </MudGrid>

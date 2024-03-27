@@ -1,10 +1,16 @@
 /// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License.
 
+using Orleans.Hosting;
+using Orleans.Providers;
+
+/// Copyright (c) Microsoft. All rights reserved.
 await Host.CreateDefaultBuilder(args)
-    .UseOrleans(
+.UseOrleans(
         (context, builder) =>
         {
+            builder.AddMemoryStreams<DefaultMemoryMessageBodySerializer>("MemoryStreams");
+            builder.AddMemoryGrainStorage("PubSubStore");
             if (context.HostingEnvironment.IsDevelopment())
             {
                 builder.UseLocalhostClustering()
