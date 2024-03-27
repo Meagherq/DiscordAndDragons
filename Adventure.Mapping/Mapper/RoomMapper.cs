@@ -35,8 +35,12 @@ public static class RoomMapper
         {
             if (room is not null && room.Region != RegionType.Unknown)
             {
-                idMap.Add(room.Id, idCount);
-                idCount++;
+                try
+                {
+                    idMap.Add(room.Id, idCount);
+                    idCount++;
+                }
+                catch { }
             }
         }
         var result = new List<RoomInfo>();

@@ -57,10 +57,10 @@ namespace Adventure.Mapping.Extensions
                 var sbX = new StringBuilder();
                 for (var y = 0; y < temp.GetLength(1); y++)
                 {
-                    var regionInitial = temp[x, y]?.Region.ToString()[..1].Replace("U", " ");
-                    var regionId = temp[x, y]?.Region != RegionType.Unknown ? temp[x, y]?.Id.ToString() : "";
+                    var regionInitial = temp[x, y]?.Region.ToString()[..1].Replace("U", "");
+                    var regionId = temp[x, y]?.Region != RegionType.Unknown ? temp[x, y]?.Id.ToString() : " ";
                     var textFormat = $"{regionInitial}{regionId} |";
-                    sbX.Append(textFormat.PadLeft(7));
+                    sbX.Append(textFormat.PadLeft(7, char.Parse(" ")));
                 }
                 sb.AppendLine(sbX.ToString());
             }
@@ -394,7 +394,7 @@ namespace Adventure.Mapping.Extensions
                     if (mapData[x, y] is not null)
                     {
                         mapData[x, y].Name = mapData[x, y].Region.ToString();
-                        mapData[x, y].Description = $"{mapData[x, y].Region.ToString()} {mapData[x, y].Id}";
+                        mapData[x, y].Description = $"{mapData[x, y].Region.ToString()} |{mapData[x, y].Id}|";
                     }
                 }
             }

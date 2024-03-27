@@ -1,5 +1,81 @@
-﻿<h3>Adventure</h3>
+﻿@page "/adventureinterface"
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedSessionStorage ProtectedSessionStore
+@inject NavigationManager MyNavigationManager
 
-@code {
+<h3>Adventure Interface</h3>
 
-}
+<MudGrid>
+    <MudItem xs="12" md="8">
+        <h4>Adventure Map</h4>
+        @if(map is not null){
+            foreach (string line in map?.Split('\n'))
+            {
+                <div style="flex:auto;width:auto;margin:0px">
+                @foreach (string t in line.Split("|"))
+                {
+                    @if (!string.IsNullOrWhiteSpace(t) && !string.IsNullOrWhiteSpace(currentPlayerLocation) && CleanLine(t) == currentPlayerLocation)
+                    {
+                        <div style="height: 20px;width: 20px;background-color: green;float:left;margin:0px"></div>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(t))
+                    {
+                        <div style="height: 20px;width: 20px;background-color: black;float:left;margin:0px"></div>
+                    }
+                    else
+                    {
+                        <div style="height: 20px;width: 20px;background-color: teal;float:left;margin:0px"></div>
+                    }
+                }
+                </div>
+                <br />
+            }
+        }
+    </MudItem>
+    <MudItem xs="12" md="4">
+        <MudText Class="pb-4">Existing Players</MudText>
+        <MudTable Items=@_players Hover="true" Breakpoint="Breakpoint.Sm" AllowUnsorted=true
+                  Context="product" Dense=true FixedHeader=true RowsPerPage=10 SortLabel="Sort By" Outlined="true">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Key</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">@product.Name</MudTd>
+                <MudTd DataLabel="Description">@product.Key</MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudItem>
+</MudGrid>
+
+<MudGrid>
+    <MudItem xs="12" md="8">
+        <MudText Class="pb-4">@playResponse</MudText>
+    </MudItem>
+    <MudItem xs="12" md="4">
+        <MudText Class="pb-4">Move Commands</MudText>
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudButton OnClick=@MoveNorth Color=Color.Tertiary Variant=Variant.Filled
+                           Size=Size.Large Disabled=@northEnabled>North</MudButton>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudButton OnClick=@MoveSouth Color=Color.Tertiary Variant=Variant.Filled
+                           Size=Size.Large Disabled=@southEnabled>South</MudButton>
+            </MudItem>
+        </MudGrid>
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudButton OnClick=@MoveEast Color=Color.Tertiary Variant=Variant.Filled
+                           Size=Size.Large Disabled=@eastEnabled>East</MudButton>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudButton OnClick=@MoveWest Color=Color.Tertiary Variant=Variant.Filled
+                           Size=Size.Large Disabled=@westEnabled>West</MudButton>
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+</MudGrid>

@@ -17,6 +17,7 @@ public class RoomGrain : Grain, IRoomGrain
     private string? _location;
     private string? _elavation;
     private string? _map;
+    private bool discovered = false;
     private readonly List<PlayerInfo> _players = new();
     private readonly List<MonsterInfo> _monsters = new();
     private readonly List<Thing> _things = new();
@@ -74,6 +75,11 @@ public class RoomGrain : Grain, IRoomGrain
         _elavation = info.Elevation;
         _map = info.Map;
 
+        if (info.Region.Contains("start"))
+        {
+            discovered = true;
+        }
+
         foreach (var kv in info.Directions)
         {
             _exits[kv.Key] = GrainFactory.GetGrain<IRoomGrain>(kv.Value);
@@ -129,7 +135,7 @@ public class RoomGrain : Grain, IRoomGrain
         builder.AppendLine(_description);
         builder.AppendLine($"Region: {_region}");
         builder.AppendLine($"Location: {_location}");
-        builder.AppendLine($"Elevation: {_elavation}");
+        //builder.AppendLine($"Elevation: {_elavation}");
 
         if (_exits.Count > 0)
         {
@@ -164,11 +170,11 @@ public class RoomGrain : Grain, IRoomGrain
                     builder.Append("  ").AppendLine(monster.Name);
                 }
         }
-        if (!string.IsNullOrWhiteSpace(_map))
-        {
-            builder.AppendLine($"Map: ");
-            builder.AppendLine($"{ _map}");
-        }
+        //if (!string.IsNullOrWhiteSpace(_map))
+        //{
+        //    builder.AppendLine($"Map: ");
+        //    builder.AppendLine($"{ _map}");
+        //}
 
         return Task.FromResult(builder.ToString());
     }
@@ -188,4 +194,9 @@ public class RoomGrain : Grain, IRoomGrain
     Task<IRoomGrain?> IRoomGrain.ExitTo(string direction) =>
         Task.FromResult(
             _exits.ContainsKey(direction) ? _exits[direction] : null);
+
+    Task<bool> IRoomGrain.GetDiscovery()
+    {
+        return Task.FromResult(discovered);
+    }
 }

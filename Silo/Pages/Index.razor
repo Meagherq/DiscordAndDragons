@@ -1,33 +1,39 @@
 @page "/"
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject ProtectedSessionStorage ProtectedSessionStore
+@inject NavigationManager MyNavigationManager
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-16">
-    <MudText Typo=Typo.h4 Class="pb-4">Welcome to the Orleans Discord Adventure App</MudText>
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+    <MudText Typo=Typo.h4 Class="pb-4">Welcome to the Discord and Dungeons App</MudText>
     <MudList>
-        <MudListItem>
-            Use the this link to get to the Swagger Page: <a href="/swagger/index.html">Swagger Link</a>.
-        </MudListItem>
-    </MudList>
-</MudContainer>
-<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-16">
-    <MudList>
-@*         <MudSelect T="AdventureInfo" Label="name" Variant=Variant.Text AnchorOrigin=Origin.BottomCenter>
-            @foreach (var key in _adventures)
-            {
-                <MudSelectItem T="AdventureInfo" Value=@key.Name/>
-            }
-        </MudSelect> *@
         <MudText>
             Enter your AdventureId, or leave blank to start a new Adventure.
         </MudText>
-        <MudNumericField @bind-Value=AdventureId Label="AdventureId" Variant="Variant.Text" TextChanged="UpdateAdventureId"/>
+        <MudNumericField @bind-Value=AdventureId Label="AdventureId (Leave Blank for a new Adventure)" Variant="Variant.Text" TextChanged="UpdateAdventureId" />
         <MudSpacer />
         <MudTextField @bind-Value="AdventureName" Placeholder="Adventure Name"
             Adornment="Adornment.Start" MaxLength="20" TextChanged="UpdateAdventureName" Immediate=true>
         </MudTextField>
         <MudSpacer />
-        <MudButton OnClick=@CreateSession Color=Color.Tertiary Variant=Variant.Filled
+        <br />
+        <MudButton OnClick=@CreateAdventure Color=Color.Tertiary Variant=Variant.Filled
             Size=Size.Large Disabled=@createAdventureEnabled>Start /Join Adventure</MudButton>
     </MudList>
+</MudContainer>
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+    <MudText Typo=Typo.h4 Class="pb-4">...or pickup an existing adventure</MudText>
+    <MudTable Items=@_adventures Hover="true" Breakpoint="Breakpoint.Sm" AllowUnsorted=true
+              Context="product" Dense=true FixedHeader=true RowsPerPage=10 SortLabel="Sort By" Outlined="true">
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+            <MudTh>Key</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Name">@product.Name</MudTd>
+            <MudTd DataLabel="Description">@product.Key</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
 </MudContainer>

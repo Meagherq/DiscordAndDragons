@@ -1,0 +1,39 @@
+﻿@page "/characterselection"
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject ProtectedSessionStorage ProtectedSessionStore
+@inject NavigationManager MyNavigationManager
+
+<MudToolBar DisableGutters="true">
+    <MudText Typo="Typo.h4">Character Selection</MudText>
+    <MudSpacer />
+</MudToolBar>
+
+<MudGrid>
+    <MudItem xs="12" md="4">
+        <MudText Class="pb-4">Existing Players</MudText>
+        <MudTable Items=@_players Hover="true" Breakpoint="Breakpoint.Sm" AllowUnsorted=true
+                  Context="product" Dense=true FixedHeader=true RowsPerPage=10 SortLabel="Sort By" Outlined="true">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Key</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">@product.Name</MudTd>
+                <MudTd DataLabel="Description">@product.Key</MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudItem>
+    <MudItem xs="12" md="4">
+        <MudText Class="pb-4">Create Player</MudText>
+        <MudTextField @bind-Value="_playerName" Placeholder="Player Name"
+                      Adornment="Adornment.Start" MaxLength="20" TextChanged="UpdatePlayerName" Immediate=true>
+        </MudTextField>
+        <MudSpacer />
+        <br />
+        <MudButton OnClick=@CreatePlayer Color=Color.Tertiary Variant=Variant.Filled
+                   Size=Size.Large Disabled=@createPlayerEnabled>Create Player</MudButton>
+    </MudItem>
+</MudGrid>

@@ -31,4 +31,5 @@ public interface IRoomGrain : IGrainWithStringKey
     // Players and monsters can be killed, if you have the right weapon.
     Task<PlayerInfo?> FindPlayer(string name);
     Task<MonsterInfo?> FindMonster(string name);
+    Task<bool> GetDiscovery();
 }

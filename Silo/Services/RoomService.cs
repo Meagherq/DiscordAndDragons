@@ -69,9 +69,12 @@ public sealed class RoomService : BaseClusterService
         return $"Created {mappedRooms.Count} rooms";
     }
 
-    public async Task<string> ViewMap()
+    public async Task<string> ViewMap(int adventureId)
     {
-        var roomGrain = _grainFactory.GetGrain<IRoomGrain>("0");
+        var adventureGrain = _grainFactory.GetGrain<IAdventureGrain>(adventureId);
+        var rooms = await adventureGrain.Rooms();
+        var startRoom = rooms.OrderBy(r => r.Id).FirstOrDefault();
+        var roomGrain = _grainFactory.GetGrain<IRoomGrain>(startRoom.Id);
 
         return await roomGrain.ViewMap();
     }
@@ -123,5 +126,12 @@ public sealed class RoomService : BaseClusterService
         var monsterGrain = _grainFactory.GetGrain<IMonsterGrain>(data.Id);
         await monsterGrain.SetInfo(data);
         await monsterGrain.SetRoomGrain(room);
+    }
+
+    public async Task<bool> GetDiscovery(int roomId)
+    {
+        var roomGrain = _grainFactory.GetGrain<IRoomGrain>(roomId.ToString());
+        var result =  await roomGrain.GetDiscovery();
+        return result;
     }
 }

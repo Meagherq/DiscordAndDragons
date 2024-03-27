@@ -23,9 +23,9 @@ public class RoomController : ControllerBase
     }
 
     [HttpPost("viewMap")]
-    public async Task<IActionResult> CreatePlayer()
+    public async Task<IActionResult> ViewMap(int adventureId)
     {
-        var createdResult = await _roomService.ViewMap();
+        var createdResult = await _roomService.ViewMap(adventureId);
 
         return Ok(createdResult);
     }
