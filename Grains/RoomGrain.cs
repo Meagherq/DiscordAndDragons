@@ -17,6 +17,7 @@ public class RoomGrain : Grain, IRoomGrain
     private string? _location;
     private string? _elavation;
     private string? _map;
+    private string? _id;
     private bool discovered = false;
     private readonly List<PlayerInfo> _players = new();
     private readonly List<MonsterInfo> _monsters = new();
@@ -74,6 +75,7 @@ public class RoomGrain : Grain, IRoomGrain
         _location = info.Location;
         _elavation = info.Elevation;
         _map = info.Map;
+        _id = info.Id;
 
         if (info.Region.Contains("start"))
         {
@@ -128,7 +130,6 @@ public class RoomGrain : Grain, IRoomGrain
             _monsters.FirstOrDefault(
                 x => x?.Name?.ToLower()?.Contains(name) ?? false));
     }
-
     Task<string> IRoomGrain.Description(PlayerInfo whoisAsking)
     {
         StringBuilder builder = new();

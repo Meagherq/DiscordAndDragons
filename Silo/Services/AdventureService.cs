@@ -44,4 +44,9 @@ public sealed class AdventureService : BaseClusterService
         var adventureGrain = _client.GetGrain<IAdventureGrain>(adventureId);
         return await adventureGrain.Rooms();
     }
+    public async Task<int?[,]> GetIdMap(int adventureId)
+    {
+        var adventureGrain = _client.GetGrain<IAdventureGrain>(adventureId);
+        return await adventureGrain.IdMap();
+    }
 }

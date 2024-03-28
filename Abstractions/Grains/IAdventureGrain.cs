@@ -9,7 +9,9 @@ namespace Adventure.Abstractions.Grains;
 public interface IAdventureGrain : IGrainWithIntegerKey
 {
     Task<string?> Name();
+    Task<int?[,]> IdMap();
     Task SetName(string name);
+    Task SetIdMap(int?[,] idMap);
     Task<List<PlayerInfo>> Players();
     Task AddPlayer(PlayerInfo player);
     Task RemovePlayer(PlayerInfo player);

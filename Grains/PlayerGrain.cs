@@ -315,7 +315,7 @@ public class PlayerGrain : Grain, IPlayerGrain
 
         var streamId = StreamId.Create(nameof(IPlayerGrain), _myInfo.AdventureId.Value);
         this.GetStreamProvider("MemoryStreams").GetStream<PlayerNotification>(_myInfo.AdventureId.Value)
-            .OnNextAsync(new PlayerNotification(message, Guid.Parse(_myInfo.Key)))
+            .OnNextAsync(new PlayerNotification(message, Guid.Parse(_myInfo.Key), _roomGrain.GetPrimaryKeyString()))
             .Ignore();
 
         return message;

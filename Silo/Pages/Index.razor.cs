@@ -38,9 +38,11 @@ public sealed partial class Index
     }
     private async Task CreateAdventure()
     {
+        createAdventureEnabled = true;
         AdventureId = await _adventureService.Create(AdventureName);
         await ProtectedSessionStore.SetAsync("AdventureId", AdventureId);
         _adventures = await _adventureLogService.ListAdventures();
+
         await _roomService.Create(AdventureId.Value);
 
         MyNavigationManager.NavigateTo($"{MyNavigationManager.BaseUri}CharacterSelection?adventureId={AdventureId}");

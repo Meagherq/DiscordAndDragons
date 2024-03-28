@@ -28,6 +28,7 @@ public sealed partial class AdventureInterface
     private string playResponse;
     private string currentPlayerLocation;
     private StreamSubscriptionHandle<PlayerNotification>? subscription;
+    private int?[,] _adventureIdMap;
 
     [Inject]
     public PlayerService _playerService { get; set; } = null!;
@@ -61,6 +62,7 @@ public sealed partial class AdventureInterface
         }
 
         _players = await _adventureService.GetPlayers(AdventureId.Value);
+        _adventureIdMap = await _adventureService.GetIdMap(AdventureId.Value);
         map = await _roomService.ViewMap(AdventureId.Value);
         map = map.Replace("Map: ", "");
 
@@ -133,7 +135,7 @@ public sealed partial class AdventureInterface
 
         if (response.Contains("|"))
         {
-            currentPlayerLocation = response[(response.IndexOf("|")+1)..response.LastIndexOf("|")];
+            currentPlayerLocation = response[(response.IndexOf("|") + 1)..response.LastIndexOf("|")];
         }
     }
 
@@ -154,6 +156,7 @@ public sealed partial class AdventureInterface
         playResponse = notification.message;
         if (notification.playerId == PlayerId) {
             ProcessResponse(notification.message);
+            //currentPlayerLocation = notification.roomId;
         }
         else
         {

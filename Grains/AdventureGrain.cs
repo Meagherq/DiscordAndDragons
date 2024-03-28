@@ -9,6 +9,7 @@ public class AdventureGrain : Grain, IAdventureGrain
     private readonly List<MonsterInfo> _monsters = new();
     private readonly List<RoomInfo> _rooms = new();
     protected readonly IClusterClient _client = null!;
+    private int?[,] _idMap = null!;
 
     public AdventureGrain(IClusterClient client)
     {
@@ -34,6 +35,7 @@ public class AdventureGrain : Grain, IAdventureGrain
     }
 
     Task<string?> IAdventureGrain.Name() => Task.FromResult(_adventureInfo?.Name);
+    Task<int?[,]> IAdventureGrain.IdMap() => Task.FromResult(_idMap);
 
     public Task<List<PlayerInfo>> Players()
     {
@@ -56,6 +58,11 @@ public class AdventureGrain : Grain, IAdventureGrain
         _adventureInfo = new AdventureInfo((int)this.GetPrimaryKeyLong(), name);
         var adventureLogGrain = _client.GetGrain<IAdventureLogGrain>(0);
         await adventureLogGrain.AddAdventure(new AdventureInfo(_adventureInfo.Key, name));
+    }
+
+    public async Task SetIdMap(int?[,] idMap)
+    {
+        _idMap = idMap;
     }
 
     public Task<List<MonsterInfo>> Monsters()

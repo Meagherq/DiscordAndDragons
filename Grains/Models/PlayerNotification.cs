@@ -10,4 +10,4 @@ using System.Threading.Tasks;
 namespace Adventure.Grains.Models;
 [Immutable]
 [GenerateSerializer]
-public record class PlayerNotification(string message, Guid? playerId);
+public record class PlayerNotification(string message, Guid? playerId, string? roomId);

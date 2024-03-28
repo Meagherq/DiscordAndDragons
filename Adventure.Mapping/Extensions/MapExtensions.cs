@@ -18,7 +18,7 @@ namespace Adventure.Mapping.Extensions
         /// Creates a new Map for Adventure Game
         /// </summary>
         /// <returns></returns>
-        public static List<RoomInfo> CreateMap(int adventureId)
+        public static MapRoomData[,] CreateMap(int adventureId)
         {
             //Generate random dimensions for the array
             var random = new Random();
@@ -41,7 +41,37 @@ namespace Adventure.Mapping.Extensions
             }
 
             //Return map data sorted by Id ASC
-            return RoomMapper.MapRooms(mapData, adventureId).OrderBy(x => x.Id).ToList();
+            return mapData;
+        }
+
+        /// <summary>
+        /// Convert MapRoomData array to List<RoomInfo>
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="adventureId"></param>
+        /// <returns></returns>
+        public static List<RoomInfo> BuildList(MapRoomData[,] data, int adventureId)
+        {
+            return RoomMapper.MapRooms(data, adventureId).OrderBy(x => x.Id).ToList();
+        }
+
+        /// <summary>
+        /// Converts a MapRoomData array to an int? array
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="adventureId"></param>
+        /// <returns></returns>
+        public static int?[,] BuildIdMap(MapRoomData[,] data)
+        {
+            var idArray = new int?[mapData.GetLength(0), mapData.GetLength(1)];
+            for (var x = 0; x < mapData.GetLength(0); x++)
+            {
+                for (var y = 0; y < mapData.GetLength(1); y++)
+                {
+                    idArray[x, y] = mapData[x, y]?.Id;
+                }
+            }
+            return idArray;
         }
 
         /// <summary>
@@ -454,7 +484,7 @@ namespace Adventure.Mapping.Extensions
                 if (roomsInRow > (mapData.GetLength(0) / 2)) { columnsWithPotentialIssues++; }
             }
 
-            return rowsWithPotentialIssues > 5 || columnsWithPotentialIssues > 5;
+            return rowsWithPotentialIssues > (mapData.GetLength(0) / 4) || columnsWithPotentialIssues > (mapData.GetLength(1) / 4);
         }
     }
 }
