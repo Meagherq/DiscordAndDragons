@@ -12,6 +12,9 @@ env:
 
 jobs:
   build-and-deploy:
+    permissions:
+      id-token: 'write'
+      
     environment: dev
     runs-on: ubuntu-latest
     steps:
