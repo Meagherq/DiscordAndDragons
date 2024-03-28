@@ -15,11 +15,14 @@
                   Context="product" Dense=true FixedHeader=true RowsPerPage=10 SortLabel="Sort By" Outlined="true">
             <HeaderContent>
                 <MudTh>Name</MudTh>
-                <MudTh>Key</MudTh>
+                <MudTh>Join</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Name">@product.Name</MudTd>
-                <MudTd DataLabel="Description">@product.Key</MudTd>
+                <MudTd DataLabel="Description">
+                    <MudButton @onclick="() => JoinPlayer(product.Key)" Color=Color.Tertiary Variant=Variant.Filled
+                               Size=Size.Large>Join</MudButton>
+                </MudTd>
             </RowTemplate>
             <PagerContent>
                 <MudTablePager />

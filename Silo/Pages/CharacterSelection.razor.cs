@@ -63,4 +63,11 @@ public sealed partial class CharacterSelection
 
         MyNavigationManager.NavigateTo($"{MyNavigationManager.BaseUri}AdventureInterface?adventureId={AdventureId}");
     }
+
+    private async Task JoinPlayer(string _playerId)
+    {
+        await ProtectedSessionStore.SetAsync("playerId", _playerId);
+
+        MyNavigationManager.NavigateTo($"{MyNavigationManager.BaseUri}AdventureInterface?adventureId={AdventureId}");
+    }
 }

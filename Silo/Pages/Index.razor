@@ -16,21 +16,24 @@
         </MudTextField>
         <MudSpacer />
         <br />
-        <MudButton OnClick=@CreateAdventure Color=Color.Tertiary Variant=Variant.Filled
+        <MudButton OnClick=@CreateOrJoinAdventure Color=Color.Tertiary Variant=Variant.Filled
             Size=Size.Large Disabled=@createAdventureEnabled>Start /Join Adventure</MudButton>
     </MudList>
 </MudContainer>
-<MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-16" >
     <MudText Typo=Typo.h4 Class="pb-4">...or pickup an existing adventure</MudText>
     <MudTable Items=@_adventures Hover="true" Breakpoint="Breakpoint.Sm" AllowUnsorted=true
               Context="product" Dense=true FixedHeader=true RowsPerPage=10 SortLabel="Sort By" Outlined="true">
         <HeaderContent>
             <MudTh>Name</MudTh>
-            <MudTh>Key</MudTh>
+            <MudTh>Join</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Name">@product.Name</MudTd>
-            <MudTd DataLabel="Description">@product.Key</MudTd>
+            <MudTd>
+                <MudButton @onclick="() => JoinExistingAdventure(product.Key)" Color=Color.Tertiary Variant=Variant.Filled
+                           Size=Size.Large>Join</MudButton>
+            </MudTd>
         </RowTemplate>
         <PagerContent>
             <MudTablePager />

@@ -15,6 +15,7 @@ public sealed partial class Index
     private string _adventureName;
     private bool createAdventureEnabled = true;
     private List<AdventureInfo> _adventures = new();
+    private AdventureInfo selectedAdventure = null;
     string AdventureName
     {
         get { return _adventureName; }
@@ -36,26 +37,24 @@ public sealed partial class Index
         _adventures = await _adventureLogService.ListAdventures();
         base.OnInitializedAsync();
     }
-    private async Task CreateAdventure()
+    private async Task CreateOrJoinAdventure()
     {
         createAdventureEnabled = true;
-        AdventureId = await _adventureService.Create(AdventureName);
+        if (AdventureId is null)
+        {
+            AdventureId = await _adventureService.Create(AdventureName);
+            _adventures = await _adventureLogService.ListAdventures();
+            await _roomService.Create(AdventureId.Value);
+        }
+
         await ProtectedSessionStore.SetAsync("AdventureId", AdventureId);
-        _adventures = await _adventureLogService.ListAdventures();
-
-        await _roomService.Create(AdventureId.Value);
-
         MyNavigationManager.NavigateTo($"{MyNavigationManager.BaseUri}CharacterSelection?adventureId={AdventureId}");
     }
 
     private void UpdateAdventureId(string? e)
     {
         AdventureId = int.TryParse(e.ToString(), out var result) ? result : null;
-    }
-    private async void UpdateAdventureName(string? e)
-    {
-        _adventureName = e;
-        if (e.Length > 0)
+        if (AdventureId is not null && AdventureId.Value > 100000)
         {
             createAdventureEnabled = false;
         }
@@ -63,5 +62,23 @@ public sealed partial class Index
         {
             createAdventureEnabled = true;
         }
+    }
+    private async void UpdateAdventureName(string? e)
+    {
+        _adventureName = e;
+        if (e.Length > 0 || (AdventureId is not null && AdventureId.Value > 100000))
+        {
+            createAdventureEnabled = false;
+        }
+        else
+        {
+            createAdventureEnabled = true;
+        }
+    }
+
+    private async Task JoinExistingAdventure(int adventureId)
+    {
+        await ProtectedSessionStore.SetAsync("AdventureId", adventureId);
+        MyNavigationManager.NavigateTo($"{MyNavigationManager.BaseUri}CharacterSelection?adventureId={adventureId}");
     }
 }
