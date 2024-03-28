@@ -10,7 +10,6 @@ env:
   AZURE_RESOURCE_GROUP_NAME: adventure-game-rg
   AZURE_RESOURCE_GROUP_LOCATION: eastus
 
-
 jobs:
   build-and-deploy:
     permissions:
