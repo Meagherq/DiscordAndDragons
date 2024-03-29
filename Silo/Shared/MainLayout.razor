@@ -22,13 +22,10 @@
         <MudToggleIconButton Toggled="@_isDarkTheme" ToggledChanged=@OnToggledChangedAsync 
             Title="Switch to Dark Theme" Icon=@Icons.Material.Outlined.DarkMode Color=@Color.Inherit
             ToggledTitle="Switch to Light Theme" ToggledIcon=@Icons.Material.Filled.WbSunny ToggledColor=@Color.Default />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" 
-            Link="https://github.com/Azure-Samples/Orleans-Cluster-on-Azure-App-Service" 
-            Target="_blank" />
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="0">
         <MudDrawerHeader>
-            <MudText Typo="Typo.h5" Color=Color.Surface>Shopping Cart</MudText>
+            <MudText Typo="Typo.h5" Color=Color.Surface>Main Menu</MudText>
         </MudDrawerHeader>
         <NavMenu />
     </MudDrawer>
