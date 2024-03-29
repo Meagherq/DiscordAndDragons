@@ -21,3 +21,17 @@ public interface IAdventureGrain : IGrainWithIntegerKey
     Task AddMonster(MonsterInfo monster);
     Task RemoveMonster(MonsterInfo monster);
 }
+[GenerateSerializer]
+public class AdventureState
+{
+    [Id(0)]
+    public AdventureInfo adventureInfo { get; set; } = null!;
+    [Id(1)]
+    public List<PlayerInfo> players { get; set; } = new();
+    [Id(2)]
+    public List<MonsterInfo> monsters { get; set; } = new();
+    [Id(3)]
+    public List<RoomInfo> rooms { get; set; } = new();
+    [Id(4)]
+    public int?[,] idMap { get; set; } = null!;
+}

@@ -1,21 +1,24 @@
 using Adventure.Abstractions.Grains;
 using Adventure.Abstractions.Info;
+using Microsoft.VisualBasic;
 
 namespace Adventure.Grains;
 
 public class MonsterGrain : Grain, IMonsterGrain
 {
-    private MonsterInfo _monsterInfo = new();
-    private IRoomGrain? _roomGrain; // Current room
+    private readonly IPersistentState<MonsterState> _state;
+
     protected readonly IClusterClient _client = null!;
-    public MonsterGrain(IClusterClient client)
+    public MonsterGrain(IClusterClient client, [PersistentState(stateName: "monster", storageName: "monster")]
+            IPersistentState<MonsterState> state)
     {
         _client = client;
+        _state = state;
     }
 
     public override Task OnActivateAsync(CancellationToken cancellationToken)
     {
-        _monsterInfo = _monsterInfo with { Id = this.GetPrimaryKeyString() };
+        _state.State.monsterInfo = _state.State.monsterInfo with { Id = this.GetPrimaryKeyString() };
 
         RegisterTimer(
             _ => Move(),
@@ -26,71 +29,77 @@ public class MonsterGrain : Grain, IMonsterGrain
         return base.OnActivateAsync(cancellationToken);
     }
 
-    Task IMonsterGrain.SetInfo(MonsterInfo info)
+    async Task IMonsterGrain.SetInfo(MonsterInfo info)
     {
-        _monsterInfo = info;
+        _state.State.monsterInfo = info;
         var adventure = _client.GetGrain<IAdventureGrain>(info.AdventureId.Value);
         if (adventure is not null)
         {
-            adventure.AddMonster(_monsterInfo);
+            adventure.AddMonster(_state.State.monsterInfo);
         }
-        return Task.CompletedTask;
+        await _state.WriteStateAsync();
     }
 
-    Task IMonsterGrain.AddToAdventure(int adventureId)
+    async Task IMonsterGrain.AddToAdventure(int adventureId)
     {
-        _client.GetGrain<IAdventureGrain>(adventureId).AddMonster(_monsterInfo);
-        return Task.CompletedTask;
+        _client.GetGrain<IAdventureGrain>(adventureId).AddMonster(_state.State.monsterInfo);
+        await _state.WriteStateAsync();
     }
 
-    Task<string?> IMonsterGrain.Name() => Task.FromResult(_monsterInfo.Name);
+    Task<string?> IMonsterGrain.Name() => Task.FromResult(_state.State.monsterInfo.Name);
 
     async Task IMonsterGrain.SetRoomGrain(IRoomGrain room)
     {
-        if (_roomGrain is not null)
+        if (_state.State.roomGrain is not null)
         {
-            await _roomGrain.Exit(_monsterInfo);
+            var roomGrain = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
+            await roomGrain.Exit(_state.State.monsterInfo);
         }
 
-        _roomGrain = room;
-        await _roomGrain.Enter(_monsterInfo);
+        _state.State.roomGrain = room.GetPrimaryKeyString();
+        var tempRoom = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
+        await tempRoom.Enter(_state.State.monsterInfo);
     }
 
-    Task<IRoomGrain> IMonsterGrain.RoomGrain() => Task.FromResult(_roomGrain!);
+    Task<string> IMonsterGrain.RoomGrain() => Task.FromResult(_state.State.roomGrain!);
 
     private async Task Move()
     {
-        if (_roomGrain is not null)
+        if (_state.State.roomGrain is not null)
         {
             var directions = new[] { "north", "south", "west", "east" };
             var rand = Random.Shared.Next(0, 4);
 
-            var nextRoom = await _roomGrain.ExitTo(directions[rand]);
+            var room = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
+
+            var nextRoom = await room.ExitTo(directions[rand]);
             if (nextRoom is null)
             {
                 return;
             }
 
-            await _roomGrain.Exit(_monsterInfo);
-            await nextRoom.Enter(_monsterInfo);
+            await room.Exit(_state.State.monsterInfo);
+            await nextRoom.Enter(_state.State.monsterInfo);
 
-            _roomGrain = nextRoom;
+            _state.State.roomGrain = nextRoom.GetPrimaryKeyString();
+            await _state.WriteStateAsync();
         }
     }
 
 
     Task<string> IMonsterGrain.Kill(IRoomGrain room)
     {
-        if (_roomGrain is not null)
+        if (_state.State.roomGrain is not null)
         {
-            return _roomGrain.GetPrimaryKey() != room.GetPrimaryKey()
-                ? Task.FromResult($"{_monsterInfo.Name} snuck away. You were too slow!")
-                : _roomGrain.Exit(_monsterInfo)
-                    .ContinueWith(t => $"{_monsterInfo.Name} is dead.");
+            var roomGrain = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
+            return roomGrain != room
+                ? Task.FromResult($"{_state.State.monsterInfo.Name} snuck away. You were too slow!")
+                : roomGrain.Exit(_state.State.monsterInfo)
+                    .ContinueWith(t => $"{_state.State.monsterInfo.Name} is dead.");
         }
 
         return Task.FromResult(
-            $"{_monsterInfo.Name} is already dead. " +
+            $"{_state.State.monsterInfo.Name} is already dead. " +
             "You were too slow and someone else got to him!");
     }
 }

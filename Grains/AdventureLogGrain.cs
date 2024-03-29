@@ -9,16 +9,23 @@ using Adventure.Abstractions.Grains;
 namespace Adventure.Grains;
 public class AdventureLogGrain : Grain, IAdventureLogGrain
 {
-    private List<AdventureInfo> _adventures = new();
-    public Task AddAdventure(AdventureInfo adventure)
+    private readonly IPersistentState<AdventureLogState> _state;
+
+    public AdventureLogGrain([PersistentState(stateName: "adventureLog", storageName: "adventureLog")]
+            IPersistentState<AdventureLogState> state)
     {
-        _adventures.Add(adventure);
-        return Task.CompletedTask;
+        _state = state;
+    }
+
+    public async Task AddAdventure(AdventureInfo adventure)
+    {
+        _state.State.adventures.Add(adventure);
+        await _state.WriteStateAsync();
     }
 
 
-    public Task<List<AdventureInfo>> Adventures()
+    public async Task<List<AdventureInfo>> Adventures()
     {
-        return Task.FromResult(_adventures);
+        return _state.State.adventures;
     }
 }

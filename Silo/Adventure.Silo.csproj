@@ -14,11 +14,13 @@
     <PackageReference Include="Bogus" Version="35.5.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
     <PackageReference Include="Microsoft.Orleans.Clustering.AzureStorage" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Orleans.Clustering.Cosmos" Version="8.0.0" />
     <PackageReference Include="Microsoft.Orleans.CodeGenerator" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Orleans.Persistence.AzureStorage" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Orleans.Persistence.Cosmos" Version="8.0.0" />
     <PackageReference Include="Microsoft.Orleans.Serialization" Version="8.0.0" />
     <PackageReference Include="Microsoft.Orleans.Server" Version="8.0.0" />
     <PackageReference Include="Microsoft.Orleans.Streaming" Version="8.0.0" />

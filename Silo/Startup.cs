@@ -23,7 +23,7 @@ public sealed class Startup
         services.AddScoped<ComponentStateChangedObserver>();
         services.AddSingleton<ToastService>();
         services.AddLocalStorageServices();
-        services.AddApplicationInsights("Silo");
+        //services.AddApplicationInsights("Silo");
         services.AddControllers();
         services.AddSwaggerGen(c =>
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Web", Version = "v1" }));

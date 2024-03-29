@@ -9,117 +9,105 @@ namespace Adventure.Grains;
 /// </summary>
 public class RoomGrain : Grain, IRoomGrain
 {
-    // TODO: replace placeholder grain interface with actual grain
-    // communication interface(s).
+    private readonly IPersistentState<RoomState> _state;
 
-    private string? _description;
-    private string? _region;
-    private string? _location;
-    private string? _elavation;
-    private string? _map;
-    private string? _id;
-    private bool discovered = false;
-    private readonly List<PlayerInfo> _players = new();
-    private readonly List<MonsterInfo> _monsters = new();
-    private readonly List<Thing> _things = new();
-    private readonly Dictionary<string, IRoomGrain> _exits = new();
     protected readonly IClusterClient _client = null!;
-    public RoomGrain(IClusterClient client)
+    public RoomGrain(IClusterClient client, [PersistentState(stateName: "rooms", storageName: "rooms")]
+            IPersistentState<RoomState> state)
     {
         _client = client;
+        _state = state;
     }
 
-    Task IRoomGrain.Enter(PlayerInfo player)
+    async Task IRoomGrain.Enter(PlayerInfo player)
     {
-        _players.RemoveAll(x => x.Key == player.Key);
-        _players.Add(player);
-        return Task.CompletedTask;
+        _state.State.players.RemoveAll(x => x.Key == player.Key);
+        _state.State.players.Add(player);
+        await _state.WriteStateAsync();
     }
 
-    Task IRoomGrain.Exit(PlayerInfo player)
+    async Task IRoomGrain.Exit(PlayerInfo player)
     {
-        _players.RemoveAll(x => x.Key == player.Key);
-        return Task.CompletedTask;
+        _state.State.players.RemoveAll(x => x.Key == player.Key);
+        await _state.WriteStateAsync();
     }
 
-    Task IRoomGrain.Enter(MonsterInfo monster)
+    async Task IRoomGrain.Enter(MonsterInfo monster)
     {
-        _monsters.RemoveAll(x => x.Id == monster.Id);
-        _monsters.Add(monster);
-        return Task.CompletedTask;
+        _state.State.monsters.RemoveAll(x => x.Id == monster.Id);
+        _state.State.monsters.Add(monster);
+        await _state.WriteStateAsync();
     }
 
-    Task IRoomGrain.Exit(MonsterInfo monster)
+    async Task IRoomGrain.Exit(MonsterInfo monster)
     {
-        _monsters.RemoveAll(x => x.Id == monster.Id);
-        return Task.CompletedTask;
+        _state.State.monsters.RemoveAll(x => x.Id == monster.Id);
+        await _state.WriteStateAsync();
     }
 
-    Task IRoomGrain.Drop(Thing thing)
+    async Task IRoomGrain.Drop(Thing thing)
     {
-        _things.RemoveAll(x => x.Id == thing.Id);
-        _things.Add(thing);
-        return Task.CompletedTask;
+        _state.State.things.RemoveAll(x => x.Id == thing.Id);
+        _state.State.things.Add(thing);
+        await _state.WriteStateAsync();
     }
 
-    Task IRoomGrain.Take(Thing thing)
+    async Task IRoomGrain.Take(Thing thing)
     {
-        _things.RemoveAll(x => x.Name == thing.Name);
-        return Task.CompletedTask;
+        _state.State.things.RemoveAll(x => x.Name == thing.Name);
+        await _state.WriteStateAsync();
     }
 
-    Task IRoomGrain.SetInfo(RoomInfo info)
+    async Task IRoomGrain.SetInfo(RoomInfo info)
     {
-        _description = info.Description;
-        _region = info.Region;
-        _location = info.Location;
-        _elavation = info.Elevation;
-        _map = info.Map;
-        _id = info.Id;
+        _state.State.description = info.Description;
+        _state.State.region = info.Region;
+        _state.State.location = info.Location;
+        _state.State.elavation = info.Elevation;
+        _state.State.map = info.Map;
+        _state.State.id = info.Id;
 
         if (info.Region.Contains("start"))
         {
-            discovered = true;
+            _state.State.discovered = true;
         }
 
-        foreach (var kv in info.Directions)
-        {
-            _exits[kv.Key] = GrainFactory.GetGrain<IRoomGrain>(kv.Value);
-        }
+       _state.State.exits = info.Directions;
 
-        return Task.CompletedTask;
+        await _state.WriteStateAsync();
     }
 
-    Task<List<string>> IRoomGrain.ResetInfo()
+    async Task<List<string>> IRoomGrain.ResetInfo()
     {
         var result = new List<string>();
-        _description = "";
-        _region = "";
-        _location = "";
-        _elavation = "";
-        _map = "";
-        _things.Clear();
-        _exits.Clear();
+        _state.State.description = "";
+        _state.State.region = "";
+        _state.State.location = "";
+        _state.State.elavation = "";
+        _state.State.map = "";
+        _state.State.things.Clear();
+        _state.State.exits.Clear();
 
-        foreach (var e in _players)
+        foreach (var e in _state.State.players)
         {
             result.Add(e.Key);
         }
 
-        _players.Clear();
-        _monsters.Clear();
+        _state.State.players.Clear();
+        _state.State.monsters.Clear();
+        await _state.WriteStateAsync();
 
-        return Task.FromResult(result);
+        return result;
     }
 
     Task<Thing?> IRoomGrain.FindThing(string name) =>
-        Task.FromResult(_things.FirstOrDefault(x => x.Name == name));
+        Task.FromResult(_state.State.things.FirstOrDefault(x => x.Name == name));
 
     Task<PlayerInfo?> IRoomGrain.FindPlayer(string name)
     {
         name = name.ToLower();
         return Task.FromResult(
-            _players.FirstOrDefault(
+            _state.State.players.FirstOrDefault(
                 x => x?.Name?.ToLower()?.Contains(name) ?? false));
     }
 
@@ -127,37 +115,37 @@ public class RoomGrain : Grain, IRoomGrain
     {
         name = name.ToLower();
         return Task.FromResult(
-            _monsters.FirstOrDefault(
+            _state.State.monsters.FirstOrDefault(
                 x => x?.Name?.ToLower()?.Contains(name) ?? false));
     }
     Task<string> IRoomGrain.Description(PlayerInfo whoisAsking)
     {
         StringBuilder builder = new();
-        builder.AppendLine(_description);
-        builder.AppendLine($"Region: {_region}");
-        builder.AppendLine($"Location: {_location}");
+        builder.AppendLine(_state.State.description);
+        builder.AppendLine($"Region: {_state.State.region}");
+        builder.AppendLine($"Location: {_state.State.location}");
         //builder.AppendLine($"Elevation: {_elavation}");
 
-        if (_exits.Count > 0)
+        if (_state.State.exits.Count > 0)
         {
             builder.AppendLine("These exits are present:");
-            foreach (var exit in _exits)
+            foreach (var exit in _state.State.exits)
             {
                 builder.Append("  ").AppendLine(exit.Key);
             }
         }
 
-        if (_things.Count > 0)
+        if (_state.State.things.Count > 0)
         {
             builder.AppendLine("The following things are present:");
-            foreach (var thing in _things)
+            foreach (var thing in _state.State.things)
             {
                 builder.Append("  ").AppendLine(thing.Name);
             }
         }
 
-        var others = _players.Where(pi => pi.Key != whoisAsking.Key).ToArray();
-        if (others.Length > 0 || _monsters.Count > 0)
+        var others = _state.State.players.Where(pi => pi.Key != whoisAsking.Key).ToArray();
+        if (others.Length > 0 || _state.State.monsters.Count > 0)
         {
             builder.AppendLine("Beware! These guys are in the room with you:");
             if (others.Length > 0)
@@ -165,17 +153,12 @@ public class RoomGrain : Grain, IRoomGrain
                 {
                     builder.Append("  ").AppendLine(player.Name);
                 }
-            if (_monsters.Count > 0)
-                foreach (var monster in _monsters)
+            if (_state.State.monsters.Count > 0)
+                foreach (var monster in _state.State.monsters)
                 {
                     builder.Append("  ").AppendLine(monster.Name);
                 }
         }
-        //if (!string.IsNullOrWhiteSpace(_map))
-        //{
-        //    builder.AppendLine($"Map: ");
-        //    builder.AppendLine($"{ _map}");
-        //}
 
         return Task.FromResult(builder.ToString());
     }
@@ -183,21 +166,30 @@ public class RoomGrain : Grain, IRoomGrain
     Task<string> IRoomGrain.ViewMap()
     {
         StringBuilder builder = new();
-        if (!string.IsNullOrWhiteSpace(_map))
+        if (!string.IsNullOrWhiteSpace(_state.State.map))
         {
             builder.AppendLine($"Map: ");
-            builder.AppendLine($"{_map}");
+            builder.AppendLine($"{_state.State.map}");
         }
 
         return Task.FromResult(builder.ToString());
     }
 
-    Task<IRoomGrain?> IRoomGrain.ExitTo(string direction) =>
-        Task.FromResult(
-            _exits.ContainsKey(direction) ? _exits[direction] : null);
+    Task<IRoomGrain> IRoomGrain.ExitTo(string direction)
+    {
+        if (_state.State.exits.ContainsKey(direction))
+        {
+            var roomGrain = _client.GetGrain<IRoomGrain>(_state.State.exits[direction]);
+            return Task.FromResult(roomGrain);
+        }
+        else
+        {
+            return null;
+        }
+    }
 
     Task<bool> IRoomGrain.GetDiscovery()
     {
-        return Task.FromResult(discovered);
+        return Task.FromResult(_state.State.discovered);
     }
 }

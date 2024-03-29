@@ -4,82 +4,84 @@ using Adventure.Abstractions.Info;
 namespace Adventure.Grains;
 public class AdventureGrain : Grain, IAdventureGrain
 {
-    private AdventureInfo _adventureInfo = null!;
-    private readonly List<PlayerInfo> _players = new();
-    private readonly List<MonsterInfo> _monsters = new();
-    private readonly List<RoomInfo> _rooms = new();
-    protected readonly IClusterClient _client = null!;
-    private int?[,] _idMap = null!;
+    private readonly IPersistentState<AdventureState> _state;
 
-    public AdventureGrain(IClusterClient client)
+    protected readonly IClusterClient _client = null!;
+
+    public AdventureGrain(IClusterClient client, [PersistentState(stateName: "adventure", storageName: "adventure")]
+            IPersistentState<AdventureState> state)
     {
         _client = client;
+        _state = state;
     }
 
     public override async Task OnActivateAsync(CancellationToken cancellationToken)
     {
         await base.OnActivateAsync(cancellationToken);
     }
-    public Task AddPlayer(PlayerInfo player)
+    public async Task AddPlayer(PlayerInfo player)
     {
-        _players.RemoveAll(x => x.Key == player.Key);
-        _players.Add(player);
-        return Task.CompletedTask;
+        _state.State.players.RemoveAll(x => x.Key == player.Key);
+        _state.State.players.Add(player);
+        await _state.WriteStateAsync();
     }
 
-    public Task<List<RoomInfo>> AddRooms(List<RoomInfo> rooms)
+    public async Task<List<RoomInfo>> AddRooms(List<RoomInfo> rooms)
     {
-        _rooms.Clear();
-        _rooms.AddRange(rooms);
-        return Task.FromResult(_rooms);
+        _state.State.rooms.Clear();
+        _state.State.rooms.AddRange(rooms);
+        await _state.WriteStateAsync();
+        return _state.State.rooms;
     }
 
-    Task<string?> IAdventureGrain.Name() => Task.FromResult(_adventureInfo?.Name);
-    Task<int?[,]> IAdventureGrain.IdMap() => Task.FromResult(_idMap);
+    Task<string?> IAdventureGrain.Name() => Task.FromResult(_state.State.adventureInfo?.Name);
+    Task<int?[,]> IAdventureGrain.IdMap() => Task.FromResult(_state.State.idMap);
 
     public Task<List<PlayerInfo>> Players()
     {
-        return Task.FromResult(_players);
+        return Task.FromResult(_state.State.players);
     }
 
-    public Task RemovePlayer(PlayerInfo player)
+    public async Task RemovePlayer(PlayerInfo player)
     {
-        _players.Remove(player);
-        return Task.CompletedTask;
+        _state.State.players.Remove(player);
+        await _state.WriteStateAsync();
     }
 
     public Task<List<RoomInfo>> Rooms()
     {
-        return Task.FromResult(_rooms);
+        return Task.FromResult(_state.State.rooms);
     }
 
     public async Task SetName(string name)
     {
-        _adventureInfo = new AdventureInfo((int)this.GetPrimaryKeyLong(), name);
+        _state.State.adventureInfo = new AdventureInfo((int)this.GetPrimaryKeyLong(), name);
         var adventureLogGrain = _client.GetGrain<IAdventureLogGrain>(0);
-        await adventureLogGrain.AddAdventure(new AdventureInfo(_adventureInfo.Key, name));
+        await adventureLogGrain.AddAdventure(new AdventureInfo(_state.State.adventureInfo.Key, name));
+        await _state.WriteStateAsync();
     }
 
     public async Task SetIdMap(int?[,] idMap)
     {
-        _idMap = idMap;
+        _state.State.idMap = idMap;
+        await _state.WriteStateAsync();
     }
 
     public Task<List<MonsterInfo>> Monsters()
     {
-        return Task.FromResult(_monsters);
+        return Task.FromResult(_state.State.monsters);
     }
 
-    public Task AddMonster(MonsterInfo monster)
+    public async Task AddMonster(MonsterInfo monster)
     {
-        _monsters.RemoveAll(x => x.Id == monster.Id);
-        _monsters.Add(monster);
-        return Task.CompletedTask;
+        _state.State.monsters.RemoveAll(x => x.Id == monster.Id);
+        _state.State.monsters.Add(monster);
+        await _state.WriteStateAsync();
     }
 
-    public Task RemoveMonster(MonsterInfo monster)
+    public async Task RemoveMonster(MonsterInfo monster)
     {
-        _monsters.RemoveAll(x => x.Id == monster.Id);
-        return Task.CompletedTask;
+        _state.State.monsters.RemoveAll(x => x.Id == monster.Id);
+        await _state.WriteStateAsync();
     }
 }

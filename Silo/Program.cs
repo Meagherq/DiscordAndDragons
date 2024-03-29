@@ -1,6 +1,7 @@
 /// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.Azure.Cosmos;
 using Orleans.Hosting;
 using Orleans.Providers;
 
@@ -11,46 +12,65 @@ await Host.CreateDefaultBuilder(args)
         {
             builder.AddMemoryStreams<DefaultMemoryMessageBodySerializer>("MemoryStreams");
             builder.AddMemoryGrainStorage("PubSubStore");
-            //if (context.HostingEnvironment.IsDevelopment())
-            //{
-                builder.UseLocalhostClustering()
-                    .AddMemoryGrainStorage("shopping-cart")
-                    .AddStartupTask<SeedProductStoreTask>()
-                    .AddStartupTask<SeedAdventureGameTask>();
-            //}
-            //else
-            //{
-            //    var endpointAddress =
-            //        IPAddress.Parse(context.Configuration["WEBSITE_PRIVATE_IP"]!);
-            //    var strPorts =
-            //        context.Configuration["WEBSITE_PRIVATE_PORTS"]!.Split(',');
-            //    if (strPorts.Length < 2)
-            //        throw new Exception("Insufficient private ports configured.");
-            //    var (siloPort, gatewayPort) =
-            //        (int.Parse(strPorts[0]), int.Parse(strPorts[1]));
-            //    var connectionString =
-            //        context.Configuration["ORLEANS_AZURE_STORAGE_CONNECTION_STRING"];
 
-            //    builder
-            //        .ConfigureEndpoints(endpointAddress, siloPort, gatewayPort)
-            //        .Configure<ClusterOptions>(
-            //            options =>
-            //            {
-            //                options.ClusterId = context.Configuration["ORLEANS_CLUSTER_ID"];
-            //                options.ServiceId = nameof(ShoppingCartService);
-            //            })
-            //        .UseAzureStorageClustering(
-            //            options =>
-            //            {
-            //                options.ConfigureTableServiceClient(connectionString);
-            //                options.TableName = $"{context.Configuration["ORLEANS_CLUSTER_ID"]}Clustering";
-            //            })
-            //        .AddAzureTableGrainStorage("shopping-cart",
-            //            options => {
-            //                options.ConfigureTableServiceClient(connectionString);
-            //                options.TableName = $"{context.Configuration["ORLEANS_CLUSTER_ID"]}Persistence";
-            //            });
-            //}
+#if DEBUG
+            builder.UseLocalhostClustering()
+                    .AddMemoryGrainStorage("adventure")
+                    .AddMemoryGrainStorage("adventureLog")
+                    .AddMemoryGrainStorage("rooms")
+                    .AddMemoryGrainStorage("players")
+                    .AddMemoryGrainStorage("monster")
+                    .AddMemoryGrainStorage("shopping-cart");
+#else
+            builder.UseCosmosClustering(
+                configureOptions: options =>
+                {
+                    options.DatabaseName = "AdventureGame";
+                    options.ContainerName = "Cluster";
+                    options.ConfigureCosmosClient(context.Configuration["CosmosConnectionString"]);
+                })
+            .AddMemoryGrainStorage("shopping-cart");
+            builder.AddCosmosGrainStorage(
+                name: "adventure",
+                configureOptions: options =>
+                {
+                    options.DatabaseName = "AdventureGame";
+                    options.ContainerName = "Adventure";
+                    options.ConfigureCosmosClient(context.Configuration["CosmosConnectionString"]);
+                });
+            builder.AddCosmosGrainStorage(
+                name: "adventureLog",
+                configureOptions: options =>
+                {
+                    options.DatabaseName = "AdventureGame";
+                    options.ContainerName = "AdventureLog";
+                    options.ConfigureCosmosClient(context.Configuration["CosmosConnectionString"]);
+                });
+            builder.AddCosmosGrainStorage(
+                name: "rooms",
+                configureOptions: options =>
+                {
+                    options.DatabaseName = "AdventureGame";
+                    options.ContainerName = "Rooms";
+                    options.ConfigureCosmosClient(context.Configuration["CosmosConnectionString"]);
+                });
+            builder.AddCosmosGrainStorage(
+                name: "players",
+                configureOptions: options =>
+                {
+                    options.DatabaseName = "AdventureGame";
+                    options.ContainerName = "Players";
+                    options.ConfigureCosmosClient(context.Configuration["CosmosConnectionString"]);
+                });
+            builder.AddCosmosGrainStorage(
+                name: "monster",
+                configureOptions: options =>
+                {
+                    options.DatabaseName = "AdventureGame";
+                    options.ContainerName = "monster";
+                    options.ConfigureCosmosClient(context.Configuration["CosmosConnectionString"]);
+                });
+#endif
         })
     .ConfigureWebHostDefaults(
         webBuilder => webBuilder.UseStartup<Startup>())
