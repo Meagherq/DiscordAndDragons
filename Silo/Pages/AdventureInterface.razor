@@ -15,17 +15,17 @@
                 @for (var y = 0; y < _adventureIdMap.GetLength(1); y++)
                 {
                     var id = _adventureIdMap[x, y];
-                    @if (id is not null && id.ToString() == currentPlayerLocation)
+                    @if (id is not null && currentPlayerLocation is not null && id.ToString() == currentPlayerLocation)
                     {
                         <div style="height: 20px;width: 20px;background-color: green;float:left;margin:0px"></div>
                     }
-                    else if (id is not null)
+                    else if (id is not null && _discoveredRooms.Contains(id.Value))
                     {
                         <div style="height: 20px;width: 20px;background-color: black;float:left;margin:0px"></div>
                     }
                     else
                     {
-                        <div style="height: 20px;width: 20px;background-color: teal;float:left;margin:0px"></div>
+                        <div style="height: 20px;width: 20px;background-color: white;float:left;margin:0px"></div>
                     }
                 }
                 </div>
@@ -34,16 +34,14 @@
         }
     </MudItem>
     <MudItem xs="12" md="4">
-        <MudText Class="pb-4">Existing Players</MudText>
+        <MudText Class="pb-4">Current Players</MudText>
         <MudTable Items=@_players Hover="true" Breakpoint="Breakpoint.Sm" AllowUnsorted=true
                   Context="product" Dense=true FixedHeader=true RowsPerPage=10 SortLabel="Sort By" Outlined="true">
             <HeaderContent>
                 <MudTh>Name</MudTh>
-                <MudTh>Key</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Name">@product.Name</MudTd>
-                <MudTd DataLabel="Description">@product.Key</MudTd>
             </RowTemplate>
             <PagerContent>
                 <MudTablePager />
@@ -60,24 +58,24 @@
         <MudText Class="pb-4">Move Commands</MudText>
         <MudGrid>
             <MudItem xs="12" md="12">
-                    <MudButton OnClick=@PlayerCommand_North Color=Color.Tertiary Variant=Variant.Filled Style="margin-left:25%"
+                <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.north)" Color=Color.Tertiary Variant=Variant.Filled Style="margin-left:25%"
                             Size=Size.Large Disabled=@northEnabled>North</MudButton>
             </MudItem>
         </MudGrid>
         <MudGrid>
             <MudItem xs="12" md="6">
-                <MudButton OnClick=@PlayerCommand_West Color=Color.Tertiary Variant=Variant.Filled
+                <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.west)" Color=Color.Tertiary Variant=Variant.Filled
                            Size=Size.Large Disabled=@westEnabled>West</MudButton>
 
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudButton OnClick=@PlayerCommand_East Color=Color.Tertiary Variant=Variant.Filled
+                <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.east)" Color=Color.Tertiary Variant=Variant.Filled
                            Size=Size.Large Disabled=@eastEnabled>East</MudButton>
             </MudItem>
         </MudGrid>
         <MudGrid>
             <MudItem xs="12" md="12">
-                <MudButton OnClick=@PlayerCommand_South Color=Color.Tertiary Variant=Variant.Filled Style="margin-left:25%"
+                <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.south)" Color=Color.Tertiary Variant=Variant.Filled Style="margin-left:25%"
                            Size=Size.Large Disabled=@southEnabled>South</MudButton>
             </MudItem>
         </MudGrid>
@@ -87,20 +85,20 @@
     <MudItem xs="12" md="8">
         <MudText Class="pb-4">Player Commands</MudText>
         <MudItem xs="12" md="12">
-            <MudButton OnClick=@PlayerCommand_Look Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+            <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.look)" Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
                         Size=Size.Large>Look</MudButton>
-            <MudButton OnClick=@PlayerCommand_Kill Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+            <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.kill)" Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
                         Size=Size.Large>Kill</MudButton>
-            <MudButton OnClick=@PlayerCommand_Drop Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+            <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.drop)" Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
                     Size=Size.Large>Drop</MudButton>
         </MudItem>
         <br />
         <MudItem xs="12" md="12">
-            <MudButton OnClick=@PlayerCommand_Take Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+            <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.take)" Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
                         Size=Size.Large>Take</MudButton>
-            <MudButton OnClick=@PlayerCommand_Inventory Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+            <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.inventory)" Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
                         Size=Size.Large>Inventory</MudButton>
-            <MudButton OnClick=@PlayerCommand_Measure Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+            <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.measure)" Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
                         Size=Size.Large>Measure</MudButton>
         </MudItem>
     </MudItem>

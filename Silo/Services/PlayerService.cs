@@ -47,6 +47,13 @@ public sealed class PlayerService : BaseClusterService
         return $"{playerName}: {result}" ?? $"{playerName}: I don't understand.";
     }
 
+    public async Task<List<long>> DiscoveredRooms(string id)
+    {
+        var playerGrain = _client.GetGrain<IPlayerGrain>(id);
+
+        return await playerGrain.DiscoveredRooms();
+    }
+
     public Task<StreamSubscriptionHandle<PlayerNotification>> SubscribeAsync(
         int ownerKey, Func<PlayerNotification, Task> action) =>
         _client.GetStreamProvider("MemoryStreams")

@@ -50,9 +50,9 @@ namespace Adventure.Mapping.Extensions
         /// <param name="data"></param>
         /// <param name="adventureId"></param>
         /// <returns></returns>
-        public static List<RoomInfo> BuildList(MapRoomData[,] data, int adventureId)
+        public static List<RoomInfo> BuildList(MapRoomData[,] data, int adventureId, Dictionary<int, int> idMap)
         {
-            return RoomMapper.MapRooms(data, adventureId).OrderBy(x => x.Id).ToList();
+            return RoomMapper.MapRooms(data, adventureId, idMap).OrderBy(x => x.Id).ToList();
         }
 
         /// <summary>
@@ -61,14 +61,17 @@ namespace Adventure.Mapping.Extensions
         /// <param name="data"></param>
         /// <param name="adventureId"></param>
         /// <returns></returns>
-        public static int?[,] BuildIdMap(MapRoomData[,] data)
+        public static int?[,] BuildIdMap(MapRoomData[,] data, Dictionary<int, int> idMap)
         {
-            var idArray = new int?[mapData.GetLength(0), mapData.GetLength(1)];
-            for (var x = 0; x < mapData.GetLength(0); x++)
+            var idArray = new int?[data.GetLength(0), data.GetLength(1)];
+            for (var x = 0; x < data.GetLength(0); x++)
             {
-                for (var y = 0; y < mapData.GetLength(1); y++)
+                for (var y = 0; y < data.GetLength(1); y++)
                 {
-                    idArray[x, y] = mapData[x, y]?.Id;
+                    if (data[x, y] is not null && data[x, y]?.Region != RegionType.Unknown) {
+                        var id = idMap.FirstOrDefault(s => s.Key == data[x, y]?.Id).Value;
+                        idArray[x, y] = data[x, y]?.Id is null ? null : id;
+                    }
                 }
             }
             return idArray;

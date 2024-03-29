@@ -39,8 +39,9 @@ public sealed class RoomService : BaseClusterService
 
         //Create Map
         var mapData = Mapping.Extensions.MapExtensions.CreateMap(adventureId);
-        var mappedRooms = Mapping.Extensions.MapExtensions.BuildList(mapData, adventureId);
-        var idMap = Mapping.Extensions.MapExtensions.BuildIdMap(mapData);
+        var idMap = RoomMapper.MapRoomIds(mapData);
+        var mappedRooms = Mapping.Extensions.MapExtensions.BuildList(mapData, adventureId, idMap);
+        var roomIdMap = Mapping.Extensions.MapExtensions.BuildIdMap(mapData, idMap);
 
         // Initialize the game world using the game data
         var rooms = new List<IRoomGrain>();
@@ -54,7 +55,7 @@ public sealed class RoomService : BaseClusterService
         }
 
         await _client.GetGrain<IAdventureGrain>(adventureId).AddRooms(mappedRooms);
-        await _client.GetGrain<IAdventureGrain>(adventureId).SetIdMap(idMap);
+        await _client.GetGrain<IAdventureGrain>(adventureId).SetIdMap(roomIdMap);
 
         foreach (var thing in data.Things)
         {

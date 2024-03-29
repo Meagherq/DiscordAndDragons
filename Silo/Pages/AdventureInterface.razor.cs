@@ -29,6 +29,7 @@ public sealed partial class AdventureInterface
     private string currentPlayerLocation;
     private StreamSubscriptionHandle<PlayerNotification>? subscription;
     private int?[,] _adventureIdMap;
+    private List<long> _discoveredRooms = new();
 
     [Inject]
     public PlayerService _playerService { get; set; } = null!;
@@ -66,9 +67,7 @@ public sealed partial class AdventureInterface
         map = await _roomService.ViewMap(AdventureId.Value);
         map = map.Replace("Map: ", "");
 
-        var response = await _playerService.Command("look", PlayerId.ToString());
-        playResponse = response;
-        ProcessResponse(response);
+        await LoadPlayerData();
 
         subscription = await _playerService.SubscribeAsync(
             AdventureId.Value,
@@ -78,45 +77,17 @@ public sealed partial class AdventureInterface
         await base.OnInitializedAsync();
     }
 
-    private async Task PlayerCommand_North()
+    private async Task LoadPlayerData()
     {
-        await _playerService.Command(PlayerCommands.north.ToString(), PlayerId.ToString());
+        var response = await _playerService.Command("look", PlayerId.ToString());
+        playResponse = response;
+        ProcessResponse(response);
+        _discoveredRooms = await _playerService.DiscoveredRooms(PlayerId.ToString());
     }
-    private async Task PlayerCommand_South()
+
+    private async Task PlayerCommand(PlayerCommands command)
     {
-        await _playerService.Command(PlayerCommands.south.ToString(), PlayerId.ToString());
-    }
-    private async Task PlayerCommand_East()
-    {
-        await _playerService.Command(PlayerCommands.east.ToString(), PlayerId.ToString());
-    }
-    private async Task PlayerCommand_West()
-    {
-        await _playerService.Command(PlayerCommands.west.ToString(), PlayerId.ToString());
-    }
-    private async Task PlayerCommand_Look()
-    {
-        await _playerService.Command(PlayerCommands.look.ToString(), PlayerId.ToString());
-    }
-    private async Task PlayerCommand_Kill()
-    {
-        await _playerService.Command(PlayerCommands.kill.ToString(), PlayerId.ToString());
-    }
-    private async Task PlayerCommand_Drop()
-    {
-        await _playerService.Command(PlayerCommands.drop.ToString(), PlayerId.ToString());
-    }
-    private async Task PlayerCommand_Take()
-    {
-        await _playerService.Command(PlayerCommands.take.ToString(), PlayerId.ToString());
-    }
-    private async Task PlayerCommand_Inventory()
-    {
-        await _playerService.Command(PlayerCommands.inventory.ToString(), PlayerId.ToString());
-    }
-    private async Task PlayerCommand_Measure()
-    {
-        await _playerService.Command(PlayerCommands.measure.ToString(), PlayerId.ToString());
+        await _playerService.Command(command.ToString(), PlayerId.ToString());
     }
 
     private void ProcessResponse(string response)
@@ -133,10 +104,10 @@ public sealed partial class AdventureInterface
         if (response.Contains("west")) westEnabled = false;
         else westEnabled = true;
 
-        if (response.Contains("|"))
-        {
-            currentPlayerLocation = response[(response.IndexOf("|") + 1)..response.LastIndexOf("|")];
-        }
+        //if (response.Contains("|"))
+        //{
+        //    currentPlayerLocation = response[(response.IndexOf("|") + 1)..response.LastIndexOf("|")];
+        //}
     }
 
     private string CleanLine(string input)
@@ -156,7 +127,12 @@ public sealed partial class AdventureInterface
         playResponse = notification.message;
         if (notification.playerId == PlayerId) {
             ProcessResponse(notification.message);
-            //currentPlayerLocation = notification.roomId;
+            currentPlayerLocation = notification.roomId;
+            var roomId = int.Parse(notification.roomId);
+            if (!_discoveredRooms.Contains(roomId))
+            {
+                _discoveredRooms.Add(roomId);
+            }
         }
         else
         {

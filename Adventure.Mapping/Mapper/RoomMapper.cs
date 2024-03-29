@@ -14,7 +14,7 @@ using Adventure.Mapping.Models;
 namespace Adventure.Mapping.Mapper;
 public static class RoomMapper
 {
-    public static List<RoomInfo> MapRooms(MapRoomData[,] rooms, int AdventureId)
+    public static Dictionary<int, int> MapRoomIds(MapRoomData[,] rooms)
     {
         var idMap = new Dictionary<int, int>();
         var roomList = new List<MapRoomData>();
@@ -43,6 +43,10 @@ public static class RoomMapper
                 catch { }
             }
         }
+        return idMap;
+    }
+    public static List<RoomInfo> MapRooms(MapRoomData[,] rooms, int AdventureId, Dictionary<int, int> idMap)
+    {
         var result = new List<RoomInfo>();
         for (var x = 0; x < rooms.GetLength(0); x++)
         {
@@ -78,11 +82,12 @@ public static class RoomMapper
                         }
                     }
                     var map = rooms[x, y].Region == RegionType.Start ? Mapping.Extensions.MapExtensions.DrawMap(rooms) : null;
+                    var description = $"{GetEnumValue(rooms[x, y].Region)} {idMap.First(s => s.Key == rooms[x, y].Id).Value.ToString()}";
                     var room = new RoomInfo
                     (
                         idMap.First(s => s.Key == rooms[x, y].Id).Value.ToString(),
                         rooms[x, y].Name,
-                        rooms[x, y].Description,
+                        description,
                         GetEnumValue(rooms[x, y].Region),
                         "",
                         "",

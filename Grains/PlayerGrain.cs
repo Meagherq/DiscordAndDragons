@@ -16,10 +16,10 @@ public class PlayerGrain : Grain, IPlayerGrain
 {
     private IRoomGrain? _roomGrain; // Current room
     private readonly List<Thing> _things = new(); // Things that the player is carrying
-
     private bool _killed = false;
     private PlayerInfo _myInfo = null!;
     protected readonly IClusterClient _client = null!;
+    private List<long> _discoveredRooms = new();
     public PlayerGrain(IClusterClient client)
     {
         _client = client;
@@ -32,6 +32,7 @@ public class PlayerGrain : Grain, IPlayerGrain
     }
 
     Task<string?> IPlayerGrain.Name() => Task.FromResult(_myInfo?.Name);
+    Task<List<long>> IPlayerGrain.DiscoveredRooms() => Task.FromResult(_discoveredRooms);
 
     Task<IRoomGrain> IPlayerGrain.RoomGrain() => Task.FromResult(_roomGrain!);
 
@@ -123,6 +124,7 @@ public class PlayerGrain : Grain, IPlayerGrain
         if (_roomGrain is not null && destination is not null)
         {
             await _roomGrain.Exit(_myInfo);
+            _discoveredRooms.Add(int.Parse(_roomGrain.GetPrimaryKeyString()));
             await destination.Enter(_myInfo);
 
             _roomGrain = destination;
