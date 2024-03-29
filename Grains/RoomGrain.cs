@@ -121,9 +121,9 @@ public class RoomGrain : Grain, IRoomGrain
     Task<string> IRoomGrain.Description(PlayerInfo whoisAsking)
     {
         StringBuilder builder = new();
-        builder.AppendLine(_state.State.description);
+        builder.AppendLine($"Description: {_state.State.description}");
         builder.AppendLine($"Region: {_state.State.region}");
-        builder.AppendLine($"Location: {_state.State.location}");
+        //builder.AppendLine($"Location: {_state.State.location}");
         //builder.AppendLine($"Elevation: {_elavation}");
 
         if (_state.State.exits.Count > 0)
@@ -131,7 +131,7 @@ public class RoomGrain : Grain, IRoomGrain
             builder.AppendLine("These exits are present:");
             foreach (var exit in _state.State.exits)
             {
-                builder.Append("  ").AppendLine(exit.Key);
+                builder.Append("  ").Append(exit.Key);
             }
         }
 

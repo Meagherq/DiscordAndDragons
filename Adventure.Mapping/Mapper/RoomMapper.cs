@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Adventure.Abstractions.Info;
+using Adventure.Mapping.Descriptions;
 using Adventure.Mapping.Enums;
 using Adventure.Mapping.Extensions;
 using Adventure.Mapping.Models;
@@ -82,12 +83,11 @@ public static class RoomMapper
                         }
                     }
                     var map = rooms[x, y].Region == RegionType.Start ? Mapping.Extensions.MapExtensions.DrawMap(rooms) : null;
-                    var description = $"{GetEnumValue(rooms[x, y].Region)} {idMap.First(s => s.Key == rooms[x, y].Id).Value.ToString()}";
                     var room = new RoomInfo
                     (
                         idMap.First(s => s.Key == rooms[x, y].Id).Value.ToString(),
                         rooms[x, y].Name,
-                        description,
+                        GetRandomDescription(rooms[x, y].Region),
                         GetEnumValue(rooms[x, y].Region),
                         "",
                         "",
@@ -133,6 +133,42 @@ public static class RoomMapper
                 return "farmland";
             case RegionType.Forest:
                 return "forest";
+            default:
+                return "default";
+        }
+    }
+    public static string GetRandomDescription(RegionType region)
+    {
+        var random = new Random();
+        var x = random.Next(0, 19);
+        switch (region)
+        {
+            case RegionType.Start:
+                return "You awake on a horse drawn hay trailer, you look around slowly and see another person: 'You're finally awake!'";
+            case RegionType.Unknown:
+                return "uknown";
+            case RegionType.Canyon:
+                return Canyon.Descriptions()[x];
+            case RegionType.River:
+                return River.Descriptions()[x];
+            case RegionType.Dune:
+                return Dune.Descriptions()[x];
+            case RegionType.Beach:
+                return Beach.Descriptions()[x];
+            case RegionType.Volcano:
+                return Volcano.Descriptions()[x];
+            case RegionType.Swamp:
+                return Swamp.Descriptions()[x];
+            case RegionType.City:
+                return City.Descriptions()[x];
+            case RegionType.Town:
+                return Town.Descriptions()[x];
+            case RegionType.Village:
+                return Village.Descriptions()[x];
+            case RegionType.Farmland:
+                return Farmland.Descriptions()[x];
+            case RegionType.Forest:
+                return Forest.Descriptions()[x];
             default:
                 return "default";
         }
