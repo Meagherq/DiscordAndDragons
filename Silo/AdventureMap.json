@@ -15,7 +15,7 @@
             "article": "a",
             "category": "weapon",
             "foundIn": "3",
-            "commands": [ "kill" ]
+            "commands": [ "attack" ]
         },
         {
             "id": "2",

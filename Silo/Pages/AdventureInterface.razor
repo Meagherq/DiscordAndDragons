@@ -93,13 +93,19 @@
 <MudGrid>
     <MudItem xs="12" md="8">
         <MudText Class="pb-4">Player Commands</MudText>
+        <MudTextField @bind-Value="_playerCommandText" Placeholder="Player Command Text" Style="width:600px;margin-left:10%"
+                      Adornment="Adornment.Start" MaxLength="20" TextChanged="UpdatePlayerCommandText" Immediate=true>
+        </MudTextField>
+        <br />
         <MudItem xs="12" md="12">
             <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.look)" Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
                         Size=Size.Large>Look</MudButton>
-            <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.kill)" Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
-                        Size=Size.Large>Kill</MudButton>
+            <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.attack)" Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+                       Size=Size.Large>Attack</MudButton>
             <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.drop)" Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
                     Size=Size.Large>Drop</MudButton>
+            <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.eat)" Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+                       Size=Size.Large>Eat</MudButton>
         </MudItem>
         <br />
         <MudItem xs="12" md="12">
@@ -109,6 +115,8 @@
                         Size=Size.Large>Inventory</MudButton>
             <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.measure)" Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
                         Size=Size.Large>Measure</MudButton>
+            <MudButton @onclick="() => PlayerCommand(Grains.Enums.PlayerCommands.drink)" Color=Color.Tertiary Variant=Variant.Filled Style="width:200px;margin-left:10%"
+                       Size=Size.Large>Drink</MudButton>
         </MudItem>
     </MudItem>
 </MudGrid>

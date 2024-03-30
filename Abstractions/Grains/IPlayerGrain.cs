@@ -36,4 +36,6 @@ public class PlayerState
     public PlayerInfo myInfo { get; set; } = null!;
     [Id(4)]
     public List<long> discoveredRooms { get; set; } = new();
+    [Id(5)]
+    public int health { get; set; } = 20;
 }

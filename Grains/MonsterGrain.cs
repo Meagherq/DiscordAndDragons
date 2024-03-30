@@ -67,35 +67,52 @@ public class MonsterGrain : Grain, IMonsterGrain
     {
         if (_state.State.roomGrain is not null)
         {
-            var directions = new[] { "north", "south", "west", "east" };
-            var rand = Random.Shared.Next(0, 4);
+            
 
-            var room = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
+            var roomGrain = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
+            var exits = await roomGrain.Exits();
 
-            var nextRoom = await room.ExitTo(directions[rand]);
-            if (nextRoom is null)
-            {
-                return;
+            if (exits is not null && exits.Count > 0) {
+                var directions = new List<string>();
+                var rand = Random.Shared.Next(0, exits.Count);
+
+                foreach (var e in exits)
+                {
+                    directions.Add(e.Key);
+                }
+
+                var room = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
+
+                var nextRoom = await room.ExitTo(directions[rand]);
+                if (nextRoom is null)
+                {
+                    return;
+                }
+
+                await room.Exit(_state.State.monsterInfo);
+                await nextRoom.Enter(_state.State.monsterInfo);
+
+                _state.State.roomGrain = nextRoom.GetPrimaryKeyString();
+                await _state.WriteStateAsync();
             }
-
-            await room.Exit(_state.State.monsterInfo);
-            await nextRoom.Enter(_state.State.monsterInfo);
-
-            _state.State.roomGrain = nextRoom.GetPrimaryKeyString();
-            await _state.WriteStateAsync();
         }
     }
 
 
-    Task<string> IMonsterGrain.Kill(IRoomGrain room)
+    Task<string> IMonsterGrain.Attack(IRoomGrain room)
     {
         if (_state.State.roomGrain is not null)
         {
             var roomGrain = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
-            return roomGrain != room
-                ? Task.FromResult($"{_state.State.monsterInfo.Name} snuck away. You were too slow!")
-                : roomGrain.Exit(_state.State.monsterInfo)
-                    .ContinueWith(t => $"{_state.State.monsterInfo.Name} is dead.");
+            if (roomGrain.GetPrimaryKeyString() != room.GetPrimaryKeyString())
+            {
+                return Task.FromResult($"{_state.State.monsterInfo.Name} snuck away. You were too slow!");
+            }
+            else
+            {
+                _state.State.monsterInfo.KilledBy.Add("Test");
+                return roomGrain.Exit(_state.State.monsterInfo).ContinueWith(t => $"{_state.State.monsterInfo.Name} is dead.");
+            }
         }
 
         return Task.FromResult(

@@ -1,4 +1,5 @@
 using System.Text;
+using Adventure.Abstractions;
 using Adventure.Abstractions.Grains;
 using Adventure.Abstractions.Info;
 using Adventure.Grains.Enums;
@@ -100,6 +101,10 @@ public class PlayerGrain : Grain, IPlayerGrain
     async Task IPlayerGrain.SetInfo(string name, int adventureId)
     {
         _state.State.myInfo = new PlayerInfo(this.GetPrimaryKeyString(), name, adventureId);
+        var rand = Random.Shared;
+
+        //Everyone starts with a Pocket Knife
+        _state.State.things.Add(new Thing(rand.Next(12341, 234123).ToString(), "Pocket Knife", "weapon", [""], 1, null));
         var adventure = _client.GetGrain<IAdventureGrain>(adventureId);
         if (adventure is not null)
         {
@@ -171,7 +176,7 @@ public class PlayerGrain : Grain, IPlayerGrain
         return await room.Description(_state.State.myInfo);
     }
 
-    private async Task<string> Kill(string target)
+    private async Task<string> Attack(string target)
     {
         if (_state.State.things.Count is 0)
         {
@@ -197,9 +202,9 @@ public class PlayerGrain : Grain, IPlayerGrain
             await roomGrain.FindMonster(target) is MonsterInfo monster)
         {
             var weapons = monster.KilledBy?.Join(_state.State.things, id => id, t => t.Id, (id, t) => t);
-            if (weapons?.Any() ?? false)
+            if (_state.State.things.Any(t => t.Category == "weapon"))
             {
-                await GrainFactory.GetGrain<IMonsterGrain>(monster.Id).Kill(roomGrain);
+                await GrainFactory.GetGrain<IMonsterGrain>(monster.Id).Attack(roomGrain);
                 await _state.WriteStateAsync();
                 return $"{target} is now dead.";
             }
@@ -304,9 +309,9 @@ public class PlayerGrain : Grain, IPlayerGrain
 
                 PlayerCommands.north or PlayerCommands.south or PlayerCommands.east or PlayerCommands.west => await Go(verb),
 
-                PlayerCommands.kill => words.Length == 1
-                    ? "Kill what?"
-                    : await Kill(command[(verb.Length + 1)..]),
+                PlayerCommands.attack => words.Length == 1
+                    ? "Attack what?"
+                    : await Attack(command[(verb.Length + 1)..]),
 
                 PlayerCommands.drop => await Drop(FindMyThing(Rest(words))),
 

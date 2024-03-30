@@ -131,7 +131,7 @@ public class RoomGrain : Grain, IRoomGrain
             builder.AppendLine("These exits are present:");
             foreach (var exit in _state.State.exits)
             {
-                builder.Append("  ").Append(exit.Key);
+                builder.Append("---").AppendLine(exit.Key);
             }
         }
 
@@ -140,7 +140,7 @@ public class RoomGrain : Grain, IRoomGrain
             builder.AppendLine("The following things are present:");
             foreach (var thing in _state.State.things)
             {
-                builder.Append("  ").AppendLine(thing.Name);
+                builder.Append("---").AppendLine(thing.Name);
             }
         }
 
@@ -151,12 +151,12 @@ public class RoomGrain : Grain, IRoomGrain
             if (others.Length > 0)
                 foreach (var player in others)
                 {
-                    builder.Append("  ").AppendLine(player.Name);
+                    builder.Append("---").AppendLine(player.Name);
                 }
             if (_state.State.monsters.Count > 0)
                 foreach (var monster in _state.State.monsters)
                 {
-                    builder.Append("  ").AppendLine(monster.Name);
+                    builder.Append("---").AppendLine($"{monster.Name} with {monster.Health} health");
                 }
         }
 
@@ -191,5 +191,10 @@ public class RoomGrain : Grain, IRoomGrain
     Task<bool> IRoomGrain.GetDiscovery()
     {
         return Task.FromResult(_state.State.discovered);
+    }
+
+    Task<Dictionary<string, string>> IRoomGrain.Exits()
+    {
+        return Task.FromResult(_state.State.exits);
     }
 }

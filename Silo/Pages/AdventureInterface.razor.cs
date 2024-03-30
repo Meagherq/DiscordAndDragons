@@ -30,6 +30,7 @@ public sealed partial class AdventureInterface
     private StreamSubscriptionHandle<PlayerNotification>? subscription;
     private int?[,] _adventureIdMap;
     private List<long> _discoveredRooms = new();
+    private string? _playerCommandText;
 
     [Inject]
     public PlayerService _playerService { get; set; } = null!;
@@ -87,7 +88,14 @@ public sealed partial class AdventureInterface
 
     private async Task PlayerCommand(PlayerCommands command)
     {
-        await _playerService.Command(command.ToString(), PlayerId.ToString());
+        if (!string.IsNullOrWhiteSpace(_playerCommandText))
+        {
+            await _playerService.Command($"{command.ToString()} {_playerCommandText}", PlayerId.ToString());
+        }
+        else
+        {
+            await _playerService.Command(command.ToString(), PlayerId.ToString());
+        }
     }
 
     private void ProcessResponse(string response)
@@ -103,11 +111,6 @@ public sealed partial class AdventureInterface
 
         if (response.Contains("west")) westEnabled = false;
         else westEnabled = true;
-
-        //if (response.Contains("|"))
-        //{
-        //    currentPlayerLocation = response[(response.IndexOf("|") + 1)..response.LastIndexOf("|")];
-        //}
     }
 
     private string CleanLine(string input)
@@ -143,5 +146,10 @@ public sealed partial class AdventureInterface
         }
         StateHasChanged();
         return Task.CompletedTask;
+    }
+
+    private async void UpdatePlayerCommandText(string? e)
+    {
+        _playerCommandText = e;
     }
 }

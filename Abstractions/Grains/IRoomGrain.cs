@@ -32,6 +32,7 @@ public interface IRoomGrain : IGrainWithStringKey
     Task<PlayerInfo?> FindPlayer(string name);
     Task<MonsterInfo?> FindMonster(string name);
     Task<bool> GetDiscovery();
+    Task<Dictionary<string, string>> Exits();
 }
 
 [GenerateSerializer]

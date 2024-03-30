@@ -82,11 +82,11 @@ public sealed class SeedAdventureGameTask : IStartupTask
         return roomGrain;
     }
 
-    private async Task MakeThing(Thing thing)
-    {
-        var roomGrain = _grainFactory.GetGrain<IRoomGrain>(thing.FoundIn);
-        await roomGrain.Drop(thing);
-    }
+    //private async Task MakeThing(Thing thing)
+    //{
+    //    var roomGrain = _grainFactory.GetGrain<IRoomGrain>(thing.FoundIn);
+    //    await roomGrain.Drop(thing);
+    //}
 
     private async Task MakeMonster(MonsterInfo data, IRoomGrain room)
     {

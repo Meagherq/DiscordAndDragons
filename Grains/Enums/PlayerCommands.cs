@@ -18,11 +18,13 @@ public enum PlayerCommands
     south,
     east,
     west,
-    kill,
+    attack,
     drop,
     take,
     inv,
     inventory,
     measure,
-    end
+    end,
+    drink,
+    eat
 }

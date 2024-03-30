@@ -57,17 +57,40 @@ public sealed class RoomService : BaseClusterService
         await _client.GetGrain<IAdventureGrain>(adventureId).AddRooms(mappedRooms);
         await _client.GetGrain<IAdventureGrain>(adventureId).SetIdMap(roomIdMap);
 
-        foreach (var thing in data.Things)
+        var thingCount = 0;
+        foreach (var thing in Mapping.Things.SeedData.ThingType())
         {
-            await MakeThing(thing);
+            var thingType = rand.Next(0, 1);
+            if (thingType == 0)
+            {
+                var thingSeedCount = rand.Next(0, thing.MaxSeed);
+                for (var i = 0; i < thingSeedCount; i++)
+                {
+                    var thingOnAdventure = new Thing(thingCount.ToString(), thing.Name, thing.Category, thing.Commands, thing.Damage, thing.HealthGain);
+                    await MakeThing(
+                        thingOnAdventure,
+                        rand.Next(1, rooms.Count).ToString());
+                    thingCount++;
+                }
+            }
         }
 
-        foreach (var monster in data.Monsters)
+        var monsterCount = 0;
+        foreach (var monster in Mapping.Monsters.SeedData.MonsterTypes())
         {
-            var monsterOnAdventure = new MonsterInfo(monster.Id, monster.Name, adventureId, monster.KilledBy);
-            await MakeMonster(
-                monsterOnAdventure,
-                rooms[rand.Next(1, rooms.Count)]);
+            var monsterType = rand.Next(0, 1);
+            if (monsterType == 0)
+            {
+                var monsterSeedCount = rand.Next(0, monster.MaxSeed);
+                for (var i = 0; i < monsterSeedCount; i++)
+                {
+                    var monsterOnAdventure = new MonsterInfo(monsterCount.ToString(), monster.Name, adventureId, monster.Health, monster.Damage, []);
+                    await MakeMonster(
+                        monsterOnAdventure,
+                        rooms[rand.Next(1, rooms.Count)]);
+                    monsterCount++;
+                }
+            }
         }
 
         return $"Created {mappedRooms.Count} rooms";
@@ -119,9 +142,9 @@ public sealed class RoomService : BaseClusterService
         return roomGrain;
     }
 
-    private async Task MakeThing(Thing thing)
+    private async Task MakeThing(Thing thing, string room)
     {
-        var roomGrain = _grainFactory.GetGrain<IRoomGrain>(thing.FoundIn);
+        var roomGrain = _grainFactory.GetGrain<IRoomGrain>(room);
         await roomGrain.Drop(thing);
     }
 
