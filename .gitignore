@@ -330,3 +330,5 @@ ASALocalRun/
 .mfractor/
 Silo/appsettings.Development.json
 /Silo/appsettings.Development.json
+.vscode/launch.json
+.vscode/tasks.json

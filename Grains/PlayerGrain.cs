@@ -204,9 +204,9 @@ public class PlayerGrain : Grain, IPlayerGrain
             var weapons = monster.KilledBy?.Join(_state.State.things, id => id, t => t.Id, (id, t) => t);
             if (_state.State.things.Any(t => t.Category == "weapon"))
             {
-                await GrainFactory.GetGrain<IMonsterGrain>(monster.Id).Attack(roomGrain);
+                string response = await GrainFactory.GetGrain<IMonsterGrain>(monster.Id).Attack(roomGrain, _state.State.things.FirstOrDefault(t => t.Category == "weapon")?.Damage.Value ?? 0, _state.State.myInfo.Name);
                 await _state.WriteStateAsync();
-                return $"{target} is now dead.";
+                return response;
             }
 
             return "With what? Your bare hands?";

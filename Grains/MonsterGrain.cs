@@ -99,24 +99,36 @@ public class MonsterGrain : Grain, IMonsterGrain
     }
 
 
-    Task<string> IMonsterGrain.Attack(IRoomGrain room)
+    async Task<string> IMonsterGrain.Attack(IRoomGrain room, int damage, string playerName)
     {
         if (_state.State.roomGrain is not null)
         {
             var roomGrain = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
             if (roomGrain.GetPrimaryKeyString() != room.GetPrimaryKeyString())
             {
-                return Task.FromResult($"{_state.State.monsterInfo.Name} snuck away. You were too slow!");
+                return $"{_state.State.monsterInfo.Name} snuck away. You were too slow!";
             }
             else
             {
-                _state.State.monsterInfo.KilledBy.Add("Test");
-                return roomGrain.Exit(_state.State.monsterInfo).ContinueWith(t => $"{_state.State.monsterInfo.Name} is dead.");
+                if(_state.State.monsterInfo.Health - damage <= 0)
+                {
+                    _state.State.monsterInfo.KilledBy.Add("Test");
+                    return await roomGrain.Exit(_state.State.monsterInfo).ContinueWith(t => $"{_state.State.monsterInfo.Name} is dead.");
+                } 
+                else 
+                {
+                    var t = _state.State.monsterInfo;
+                    var newHealth = _state.State.monsterInfo.Health - damage;
+                    var newInfo = new MonsterInfo(t.Id, t.Name, t.AdventureId, newHealth, t.Damage, t.KilledBy);
+                    _state.State.monsterInfo = newInfo;
+                    await _state.WriteStateAsync();
+                    return $"{_state.State.monsterInfo.Name} has taken {damage} damage from {playerName}. " +
+                        $"It has {_state.State.monsterInfo.Health} health left!";
+                            }
             }
         }
 
-        return Task.FromResult(
-            $"{_state.State.monsterInfo.Name} is already dead. " +
-            "You were too slow and someone else got to him!");
+        return $"{_state.State.monsterInfo.Name} is already dead. " +
+            "You were too slow and someone else got to him!";
     }
 }
