@@ -99,21 +99,22 @@ public class MonsterGrain : Grain, IMonsterGrain
     }
 
 
-    async Task<string> IMonsterGrain.Attack(IRoomGrain room, int damage, string playerName)
+    async Task<(string, int?)> IMonsterGrain.Attack(IRoomGrain room, int damage, IPlayerGrain player)
     {
         if (_state.State.roomGrain is not null)
         {
+            var playerGrain = _client.GetGrain<IPlayerGrain>(player.GetPrimaryKeyString());
             var roomGrain = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
             if (roomGrain.GetPrimaryKeyString() != room.GetPrimaryKeyString())
             {
-                return $"{_state.State.monsterInfo.Name} snuck away. You were too slow!";
+                return ($"{_state.State.monsterInfo.Name} snuck away. You were too slow!", null);
             }
             else
             {
                 if(_state.State.monsterInfo.Health - damage <= 0)
                 {
                     _state.State.monsterInfo.KilledBy.Add("Test");
-                    return await roomGrain.Exit(_state.State.monsterInfo).ContinueWith(t => $"{_state.State.monsterInfo.Name} is dead.");
+                    return (await roomGrain.Exit(_state.State.monsterInfo).ContinueWith(t => $"{_state.State.monsterInfo.Name} is dead."), null);
                 } 
                 else 
                 {
@@ -122,13 +123,14 @@ public class MonsterGrain : Grain, IMonsterGrain
                     var newInfo = new MonsterInfo(t.Id, t.Name, t.AdventureId, newHealth, t.Damage, t.KilledBy);
                     _state.State.monsterInfo = newInfo;
                     await _state.WriteStateAsync();
-                    return $"{_state.State.monsterInfo.Name} has taken {damage} damage from {playerName}. " +
-                        $"It has {_state.State.monsterInfo.Health} health left!";
-                            }
+
+                    return ($"{_state.State.monsterInfo.Name} has taken {damage} damage from test. " +
+                        $"It has {_state.State.monsterInfo.Health} health left!", _state.State.monsterInfo.Damage);
+                }
             }
         }
 
-        return $"{_state.State.monsterInfo.Name} is already dead. " +
-            "You were too slow and someone else got to him!";
+        return ($"{_state.State.monsterInfo.Name} is already dead. " +
+            "You were too slow and someone else got to him!", null);
     }
 }

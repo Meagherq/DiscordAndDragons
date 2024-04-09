@@ -5,6 +5,7 @@ using Adventure.Abstractions.Info;
 using Adventure.Grains.Enums;
 using Adventure.Grains.Models;
 using Orleans.Streams;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Adventure.Grains;
 
@@ -34,7 +35,6 @@ public class PlayerGrain : Grain, IPlayerGrain
         var roomGrain = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
         return Task.FromResult(roomGrain);
     }
-
 
     async Task IPlayerGrain.Die()
     {
@@ -171,12 +171,10 @@ public class PlayerGrain : Grain, IPlayerGrain
             return null;
         }
 
-        // Go to room '-2', which is the place of no return.
-        var room = GrainFactory.GetGrain<IRoomGrain>("-2");
-        return await room.Description(_state.State.myInfo);
+        return $"You have died";
     }
 
-    private async Task<string> Attack(string target)
+    private async Task<string> AttackMonster(string target)
     {
         if (_state.State.things.Count is 0)
         {
@@ -188,25 +186,45 @@ public class PlayerGrain : Grain, IPlayerGrain
         if (_state.State.roomGrain is not null &&
             await roomGrain.FindPlayer(target) is PlayerInfo player)
         {
-            if (_state.State.things.Any(t => t.Category == "weapon"))
-            {
-                await GrainFactory.GetGrain<IPlayerGrain>(player.Key).Die();
-                await _state.WriteStateAsync();
-                return $"{target} is now dead.";
-            }
+            //if (_state.State.things.Any(t => t.Category == "weapon"))
+            //{
+            //    await GrainFactory.GetGrain<IPlayerGrain>(player.Key).Die();
+            //    await _state.WriteStateAsync();
+            //    return $"{target} is now dead.";
+            //}
+            _state.State.health = _state.State.health - 1;
+            await _state.WriteStateAsync();
 
-            return "With what? Your bare hands?";
+            return $"Attacking other players will not be tolerated? Your deeds have caused you to take 1 damage, your health is now {_state.State.health}";
         }
 
         if (_state.State.roomGrain is not null &&
             await roomGrain.FindMonster(target) is MonsterInfo monster)
         {
+            var playerGrain = _client.GetGrain<IPlayerGrain>(this.GetPrimaryKeyString());
             var weapons = monster.KilledBy?.Join(_state.State.things, id => id, t => t.Id, (id, t) => t);
             if (_state.State.things.Any(t => t.Category == "weapon"))
             {
-                string response = await GrainFactory.GetGrain<IMonsterGrain>(monster.Id).Attack(roomGrain, _state.State.things.FirstOrDefault(t => t.Category == "weapon")?.Damage.Value ?? 0, _state.State.myInfo.Name);
+                //Find the weapon with the most damage and use it
+                var weaponDamage = _state.State.things.OrderByDescending(x => x.Damage).FirstOrDefault(t => t.Category == "weapon")?.Damage.Value ?? 1;
+                var response = await GrainFactory.GetGrain<IMonsterGrain>(monster.Id).Attack(roomGrain, weaponDamage, playerGrain);
+                var result = response.Item1;
+                //Roll random, if true, the monster attacks back
+                var random = new Random();
+                var x = random.Next(1, 100);
+
+                if (x >= 75 && response.Item2 is not null)
+                {
+                    result = result + $" The Monster attacked back and did {response.Item2.Value} damage";
+                    _state.State.health = _state.State.health - response.Item2.Value;
+                    if (_state.State.health <= 0)
+                    {
+                        _state.State.killed = true;
+                    }
+                }
+
                 await _state.WriteStateAsync();
-                return response;
+                return result;
             }
 
             return "With what? Your bare hands?";
@@ -285,20 +303,25 @@ public class PlayerGrain : Grain, IPlayerGrain
         var verb = words[0].ToLower();
         var message = "";
 
+        var roomGrain = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
+
         if (_state.State.killed && verb is not "end")
         {
-            return await CheckAlive();
+            var temp = await CheckAlive();
+            SendNotification(temp, roomGrain.GetPrimaryKeyString());
+            return temp;
         }
 
         if (_state.State.roomGrain is null)
         {
-            return "I don't understand.";
+            var temp = "I don't understand.";
+            SendNotification(message, null);
+            return temp;
         }
 
-        var roomGrain = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
-
-        if (Enum.TryParse(verb, out PlayerCommands playerCommand)) {
-            message =  playerCommand switch
+        if (Enum.TryParse(verb, out PlayerCommands playerCommand))
+        {
+            message = playerCommand switch
             {
                 PlayerCommands.look =>
                     await roomGrain.Description(_state.State.myInfo),
@@ -311,7 +334,7 @@ public class PlayerGrain : Grain, IPlayerGrain
 
                 PlayerCommands.attack => words.Length == 1
                     ? "Attack what?"
-                    : await Attack(command[(verb.Length + 1)..]),
+                    : await AttackMonster(command[(verb.Length + 1)..]),
 
                 PlayerCommands.drop => await Drop(FindMyThing(Rest(words))),
 
@@ -325,6 +348,8 @@ public class PlayerGrain : Grain, IPlayerGrain
                     ? "Measure what?"
                     : await Measure(command[(verb.Length + 1)..]),
 
+                PlayerCommands.health => $"{_state.State.myInfo.Name} health is {_state.State.health}",
+
                 PlayerCommands.end => "",
 
                 _ => "I don't understand"
@@ -337,11 +362,26 @@ public class PlayerGrain : Grain, IPlayerGrain
         roomGrain = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
         await _state.WriteStateAsync();
 
-        var streamId = StreamId.Create(nameof(IPlayerGrain), _state.State.myInfo.AdventureId.Value);
-        this.GetStreamProvider("MemoryStreams").GetStream<PlayerNotification>(_state.State.myInfo.AdventureId.Value)
-            .OnNextAsync(new PlayerNotification(message, Guid.Parse(_state.State.myInfo.Key), roomGrain.GetPrimaryKeyString()))
-            .Ignore();
+        SendNotification(message, roomGrain.GetPrimaryKeyString());
 
         return message;
+    }
+
+    private void SendNotification(string message, string? roomId)
+    {
+        var streamId = StreamId.Create(nameof(IPlayerGrain), _state.State.myInfo.AdventureId.Value);
+        this.GetStreamProvider("MemoryStreams").GetStream<PlayerNotification>(_state.State.myInfo.AdventureId.Value)
+            .OnNextAsync(new PlayerNotification(message, Guid.Parse(_state.State.myInfo.Key), roomId))
+            .Ignore();
+    }
+
+    public async Task Attack(int damage)
+    {
+        _state.State.health = _state.State.health - damage;
+        if (_state.State.health >= 0)
+        {
+            _state.State.killed = true;
+        }
+        await _state.WriteStateAsync();
     }
 }

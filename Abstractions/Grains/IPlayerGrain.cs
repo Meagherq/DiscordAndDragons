@@ -21,6 +21,7 @@ public interface IPlayerGrain : IGrainWithStringKey
     // A Player takes his turn by calling Play with a command
     Task<string?> Play(string command);
     Task<List<long>> DiscoveredRooms();
+    Task Attack(int damage);
 }
 
 [GenerateSerializer]

@@ -26,5 +26,6 @@ public enum PlayerCommands
     measure,
     end,
     drink,
-    eat
+    eat,
+    health
 }
