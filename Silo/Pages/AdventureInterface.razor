@@ -17,12 +17,58 @@
                     var id = _adventureIdMap[x, y];
                     @if (id is not null && currentPlayerLocation is not null && id.ToString() == currentPlayerLocation)
                     {
-                        <div style="height: 20px;width: 20px;background-color: green;float:left;margin:0px"></div>
+                        <div style="height: 20px;width: 20px;background-color: green;float:left;margin:0px">
+                            <img src="player.png">
+                        </div>
                     }
                     else if (id is not null && _discoveredRooms.Contains(id.Value))
                     {
+                        var region = _regionMap[id.Value];
                         <div style="height: 20px;width: 20px;background-color: black;float:left;margin:0px">
-                            <img src="canyon.png">
+                            @if (region == (int)Mapping.Enums.RegionType.Swamp)
+                            {
+                                    <img src="swamp.png">
+                            }
+                            else if (region == (int)Mapping.Enums.RegionType.Beach)
+                            {
+                                <img src="beach.png">
+                            }
+                            else if (region == (int)Mapping.Enums.RegionType.Canyon)
+                            {
+                                <img src="canyon.png">
+                            }
+                            else if (region == (int)Mapping.Enums.RegionType.City)
+                            {
+                                <img src="city.png">
+                            }
+                            else if (region == (int)Mapping.Enums.RegionType.Dune)
+                            {
+                                <img src="dune.png">
+                            }
+                            else if (region == (int)Mapping.Enums.RegionType.Farmland)
+                            {
+                                <img src="farmland.png">
+                            }
+                            else if (region == (int)Mapping.Enums.RegionType.Forest)
+                            {
+                                <img src="forest.png">
+                            }
+                            else if (region == (int)Mapping.Enums.RegionType.River)
+                            {
+                                <img src="river.png">
+                            }
+                            else if (region == (int)Mapping.Enums.RegionType.Town)
+                            {
+                                <img src="town.png">
+                            }
+                            else if (region == (int)Mapping.Enums.RegionType.Village)
+                            {
+                                <img src="village.png">
+                            }
+                            else if (region == (int)Mapping.Enums.RegionType.Volcano)
+                            {
+                                <img src="volcano.png">
+                            }
                         </div>
                     }
                     else

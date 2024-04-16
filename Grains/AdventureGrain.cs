@@ -36,6 +36,7 @@ public class AdventureGrain : Grain, IAdventureGrain
 
     Task<string?> IAdventureGrain.Name() => Task.FromResult(_state.State.adventureInfo?.Name);
     Task<int?[,]> IAdventureGrain.IdMap() => Task.FromResult(_state.State.idMap);
+    Task<Dictionary<int, int>> IAdventureGrain.RegionMap() => Task.FromResult(_state.State.regionMap);
 
     public Task<List<PlayerInfo>> Players()
     {
@@ -64,6 +65,12 @@ public class AdventureGrain : Grain, IAdventureGrain
     public async Task SetIdMap(int?[,] idMap)
     {
         _state.State.idMap = idMap;
+        await _state.WriteStateAsync();
+    }
+
+    public async Task SetRegionMap(Dictionary<int, int> regionMap)
+    {
+        _state.State.regionMap = regionMap;
         await _state.WriteStateAsync();
     }
 

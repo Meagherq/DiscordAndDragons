@@ -15,6 +15,11 @@ using Adventure.Mapping.Models;
 namespace Adventure.Mapping.Mapper;
 public static class RoomMapper
 {
+    /// <summary>
+    /// Creates a mapping of initial and final roomIds
+    /// </summary>
+    /// <param name="rooms"></param>
+    /// <returns></returns>
     public static Dictionary<int, int> MapRoomIds(MapRoomData[,] rooms)
     {
         var idMap = new Dictionary<int, int>();
@@ -101,6 +106,36 @@ public static class RoomMapper
             }
         }
         return result;
+    }
+    public static Dictionary<int, int> RegionMap(Dictionary<int, int> idMap, MapRoomData[,] rooms)
+    {
+        var regionMap = new Dictionary<int, int>();
+        var roomList = new List<MapRoomData>();
+
+        for (var x = 0; x < rooms.GetLength(0); x++)
+        {
+            for (var y = 0; y < rooms.GetLength(1); y++)
+            {
+                if (rooms[x, y] is not null)
+                {
+                    roomList.Add(rooms[x, y]);
+                }
+            }
+        }
+
+        foreach (var room in roomList.OrderBy(x => x.Region))
+        {
+            if (room is not null && room.Region != RegionType.Unknown)
+            {
+                try
+                {
+                    var finalRoomId = idMap[room.Id];
+                    regionMap.Add(finalRoomId, (int)room.Region);
+                }
+                catch { }
+            }
+        }
+        return regionMap;
     }
 
     public static string GetEnumValue(RegionType region)

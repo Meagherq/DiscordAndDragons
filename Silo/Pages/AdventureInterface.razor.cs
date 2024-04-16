@@ -29,6 +29,7 @@ public sealed partial class AdventureInterface
     private string currentPlayerLocation;
     private StreamSubscriptionHandle<PlayerNotification>? subscription;
     private int?[,] _adventureIdMap;
+    private Dictionary<int, int> _regionMap;
     private List<long> _discoveredRooms = new();
     private string? _playerCommandText;
 
@@ -65,6 +66,7 @@ public sealed partial class AdventureInterface
 
         _players = await _adventureService.GetPlayers(AdventureId.Value);
         _adventureIdMap = await _adventureService.GetIdMap(AdventureId.Value);
+        _regionMap = await _adventureService.GetRegionMap(AdventureId.Value);
         map = await _roomService.ViewMap(AdventureId.Value);
         map = map.Replace("Map: ", "");
 
