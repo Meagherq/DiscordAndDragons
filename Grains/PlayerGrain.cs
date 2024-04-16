@@ -207,7 +207,7 @@ public class PlayerGrain : Grain, IPlayerGrain
             {
                 //Find the weapon with the most damage and use it
                 var weaponDamage = _state.State.things.OrderByDescending(x => x.Damage).FirstOrDefault(t => t.Category == "weapon")?.Damage.Value ?? 1;
-                var response = await GrainFactory.GetGrain<IMonsterGrain>(monster.Id).Attack(roomGrain, weaponDamage, playerGrain);
+                var response = await GrainFactory.GetGrain<IMonsterGrain>(monster.Id).Attack(roomGrain, weaponDamage, _state.State.myInfo.Name);
                 var result = response.Item1;
                 //Roll random, if true, the monster attacks back
                 var random = new Random();

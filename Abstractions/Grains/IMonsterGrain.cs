@@ -12,7 +12,7 @@ public interface IMonsterGrain : IGrainWithStringKey
     Task SetRoomGrain(IRoomGrain room);
     Task<string> RoomGrain();
 
-    Task<(string, int?)> Attack(IRoomGrain room, int damage, IPlayerGrain player);
+    Task<(string, int?)> Attack(IRoomGrain room, int damage, string playerName);
     Task AddToAdventure(int adventureId);
 }
 

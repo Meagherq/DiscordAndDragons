@@ -99,11 +99,10 @@ public class MonsterGrain : Grain, IMonsterGrain
     }
 
 
-    async Task<(string, int?)> IMonsterGrain.Attack(IRoomGrain room, int damage, IPlayerGrain player)
+    async Task<(string, int?)> IMonsterGrain.Attack(IRoomGrain room, int damage, string playerName)
     {
         if (_state.State.roomGrain is not null)
         {
-            var playerGrain = _client.GetGrain<IPlayerGrain>(player.GetPrimaryKeyString());
             var roomGrain = _client.GetGrain<IRoomGrain>(_state.State.roomGrain);
             if (roomGrain.GetPrimaryKeyString() != room.GetPrimaryKeyString())
             {
